@@ -1,7 +1,23 @@
 import React, { useState, useRef, useCallback, useEffect } from "react";
-import { Table, Avatar, Dropdown, Button, Input, Space, Typography, Modal, List, Tag } from "antd";
+import {
+  Table,
+  Avatar,
+  Dropdown,
+  Button,
+  Input,
+  Space,
+  Typography,
+  Modal,
+  List,
+  Tag,
+} from "antd";
 import type { MenuProps } from "antd";
-import { MoreOutlined, PlusOutlined, CloseOutlined, EyeOutlined } from "@ant-design/icons";
+import {
+  MoreOutlined,
+  PlusOutlined,
+  CloseOutlined,
+  EyeOutlined,
+} from "@ant-design/icons";
 import "./table.css";
 
 interface User {
@@ -54,7 +70,10 @@ const generateDummyUsers = (count: number): User[] => {
 const generateDummyDates = (count: number): string[] => {
   const dates: string[] = [];
   const startDate = new Date("2025-05-30T00:00:00"); // Starting from Mon 30 May 2025
-  const options: Intl.DateTimeFormatOptions = { weekday: "short", day: "numeric" };
+  const options: Intl.DateTimeFormatOptions = {
+    weekday: "short",
+    day: "numeric",
+  };
 
   for (let i = 0; i < count; i++) {
     const currentDate = new Date(startDate);
@@ -68,18 +87,29 @@ const TimetableScheduler: React.FC = () => {
   const [numStaff, setNumStaff] = useState(6);
   const [numDays, setNumDays] = useState(7);
   const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
-  const [selectedCells, setSelectedCells] = useState<{ [key: string]: boolean }>({});
+  const [selectedCells, setSelectedCells] = useState<{
+    [key: string]: boolean;
+  }>({});
   const [isSelecting, setIsSelecting] = useState(false);
-  const [selectionStart, setSelectionStart] = useState<{ row: number; col: number } | null>(null);
-  const [currentSelection, setCurrentSelection] = useState<SelectionArea | null>(null);
+  const [selectionStart, setSelectionStart] = useState<{
+    row: number;
+    col: number;
+  } | null>(null);
+  const [currentSelection, setCurrentSelection] =
+    useState<SelectionArea | null>(null);
   const [dropdownVisible, setDropdownVisible] = useState(false);
-  const [dropdownPosition, setDropdownPosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [dropdownPosition, setDropdownPosition] = useState<{
+    x: number;
+    y: number;
+  }>({ x: 0, y: 0 });
   const [isDetailsModalVisible, setIsDetailsModalVisible] = useState(false);
 
   const users = generateDummyUsers(numStaff);
   const dates = generateDummyDates(numDays);
 
   const tableRef = useRef<HTMLDivElement>(null);
+
+  console.log("table 1 slots", timeSlots);
 
   // Clear time slots when numStaff or numDays change
   useEffect(() => {
@@ -95,13 +125,18 @@ const TimetableScheduler: React.FC = () => {
       work: "#4CAF50",
       rest: "#2196F3",
       break: "#FFC107",
-    })[type];
+    }[type]);
 
   const handleMouseDown = (row: number, col: number, e: React.MouseEvent) => {
     e.preventDefault();
     setIsSelecting(true);
     setSelectionStart({ row, col });
-    setCurrentSelection({ startRow: row, endRow: row, startCol: col, endCol: col });
+    setCurrentSelection({
+      startRow: row,
+      endRow: row,
+      startCol: col,
+      endCol: col,
+    });
     updateSelectedCells(row, row, col, col);
   };
 
@@ -143,7 +178,12 @@ const TimetableScheduler: React.FC = () => {
     return () => document.removeEventListener("mouseup", handleMouseUp);
   }, [handleMouseUp]);
 
-  const updateSelectedCells = (startRow: number, endRow: number, startCol: number, endCol: number) => {
+  const updateSelectedCells = (
+    startRow: number,
+    endRow: number,
+    startCol: number,
+    endCol: number
+  ) => {
     const newSelected: { [key: string]: boolean } = {};
     for (let r = startRow; r <= endRow; r++) {
       for (let c = startCol; c <= endCol; c++) {
@@ -157,21 +197,33 @@ const TimetableScheduler: React.FC = () => {
     if (!currentSelection) return;
     const newSlots: TimeSlot[] = [];
     for (let r = currentSelection.startRow; r <= currentSelection.endRow; r++) {
-      for (let c = currentSelection.startCol; c <= currentSelection.endCol; c++) {
+      for (
+        let c = currentSelection.startCol;
+        c <= currentSelection.endCol;
+        c++
+      ) {
         if (r < users.length && c < dates.length) {
           newSlots.push({
             userId: users[r].id,
             dateIndex: c,
             type,
-            startTime: type === "work" ? "09:00" : type === "rest" ? "12:00" : "15:00",
-            endTime: type === "work" ? "17:00" : type === "rest" ? "13:00" : "15:30",
+            startTime:
+              type === "work" ? "09:00" : type === "rest" ? "12:00" : "15:00",
+            endTime:
+              type === "work" ? "17:00" : type === "rest" ? "13:00" : "15:30",
           });
         }
       }
     }
     setTimeSlots((prev) => [
       ...prev.filter(
-        (s) => !newSlots.some((n) => n.userId === s.userId && n.dateIndex === s.dateIndex)
+        // This line filters out any existing time slots that would be replaced by the new slots.
+        // In other words, for each existing slot 's', we keep it only if there is NOT a new slot 'n'
+        // with the same userId and dateIndex. This prevents duplicate or overlapping slots for the same user and date.
+        (s) =>
+          !newSlots.some(
+            (n) => n.userId === s.userId && n.dateIndex === s.dateIndex
+          )
       ),
       ...newSlots,
     ]);
@@ -234,14 +286,20 @@ const TimetableScheduler: React.FC = () => {
       dataIndex: index.toString(),
       key: index.toString(),
       width: 150,
-      render: (_: unknown, record: { key: string; staff: User }, rowIndex: number) => {
+      render: (
+        _: unknown,
+        record: { key: string; staff: User },
+        rowIndex: number
+      ) => {
         const slot = getTimeSlot(users[rowIndex].id, index);
         const isSelected = selectedCells[`${rowIndex}-${index}`];
 
         const handleRemoveSlot = (e: React.MouseEvent) => {
           e.stopPropagation(); // Prevent cell selection when clicking remove
           setTimeSlots((prev) =>
-            prev.filter((s) => !(s.userId === users[rowIndex].id && s.dateIndex === index))
+            prev.filter(
+              (s) => !(s.userId === users[rowIndex].id && s.dateIndex === index)
+            )
           );
         };
 
@@ -257,7 +315,7 @@ const TimetableScheduler: React.FC = () => {
               border: "1px solid #f0f0f0",
               borderTop: "none",
               borderLeft: "none",
-              position: "relative"
+              position: "relative",
             }}
           >
             {slot && (
@@ -305,13 +363,13 @@ const TimetableScheduler: React.FC = () => {
   }));
 
   const getScheduleDetails = (): ScheduleDetail[] => {
-    const details: ScheduleDetail[] = users.map(user => ({
+    const details: ScheduleDetail[] = users.map((user) => ({
       staff: user,
       schedules: [],
     }));
 
-    timeSlots.forEach(slot => {
-      const staffDetail = details.find(d => d.staff.id === slot.userId);
+    timeSlots.forEach((slot) => {
+      const staffDetail = details.find((d) => d.staff.id === slot.userId);
       if (staffDetail) {
         staffDetail.schedules.push({
           date: dates[slot.dateIndex],
@@ -322,7 +380,7 @@ const TimetableScheduler: React.FC = () => {
       }
     });
 
-    return details.filter(detail => detail.schedules.length > 0);
+    return details.filter((detail) => detail.schedules.length > 0);
   };
 
   const getScheduleTypeTag = (type: TimeSlot["type"]) => {
@@ -335,7 +393,7 @@ const TimetableScheduler: React.FC = () => {
   };
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+    <div className="p-6 bg-red-50 min-h-screen">
       <div className="bg-white border rounded shadow-sm">
         <div className="p-4 border-b">
           <div className="flex justify-between items-center">
@@ -365,7 +423,12 @@ const TimetableScheduler: React.FC = () => {
                 max={50}
                 value={numStaff}
                 onChange={(e) =>
-                  setNumStaff(Math.min(50, Math.max(1, Number.parseInt(e.target.value) || 1)))
+                  setNumStaff(
+                    Math.min(
+                      50,
+                      Math.max(1, Number.parseInt(e.target.value) || 1)
+                    )
+                  )
                 }
                 style={{ width: 80 }}
               />
@@ -378,7 +441,12 @@ const TimetableScheduler: React.FC = () => {
                 max={30}
                 value={numDays}
                 onChange={(e) =>
-                  setNumDays(Math.min(30, Math.max(1, Number.parseInt(e.target.value) || 1)))
+                  setNumDays(
+                    Math.min(
+                      30,
+                      Math.max(1, Number.parseInt(e.target.value) || 1)
+                    )
+                  )
                 }
                 style={{ width: 80 }}
               />
@@ -403,7 +471,7 @@ const TimetableScheduler: React.FC = () => {
             className="schedule-table"
             style={{
               borderCollapse: "collapse",
-              borderSpacing: 0
+              borderSpacing: 0,
             }}
           />
 
@@ -432,15 +500,36 @@ const TimetableScheduler: React.FC = () => {
           <Space size="large">
             <Typography.Text strong>Legend:</Typography.Text>
             <Space>
-              <div style={{ width: 12, height: 12, borderRadius: 4, background: "#4CAF50" }} />
+              <div
+                style={{
+                  width: 12,
+                  height: 12,
+                  borderRadius: 4,
+                  background: "#4CAF50",
+                }}
+              />
               <span>Work</span>
             </Space>
             <Space>
-              <div style={{ width: 12, height: 12, borderRadius: 4, background: "#2196F3" }} />
+              <div
+                style={{
+                  width: 12,
+                  height: 12,
+                  borderRadius: 4,
+                  background: "#2196F3",
+                }}
+              />
               <span>Rest</span>
             </Space>
             <Space>
-              <div style={{ width: 12, height: 12, borderRadius: 4, background: "#FFC107" }} />
+              <div
+                style={{
+                  width: 12,
+                  height: 12,
+                  borderRadius: 4,
+                  background: "#FFC107",
+                }}
+              />
               <span>Break</span>
             </Space>
           </Space>
@@ -463,7 +552,9 @@ const TimetableScheduler: React.FC = () => {
                 title={
                   <Space>
                     <span>{detail.staff.name}</span>
-                    <Typography.Text type="secondary">({detail.staff.role})</Typography.Text>
+                    <Typography.Text type="secondary">
+                      ({detail.staff.role})
+                    </Typography.Text>
                   </Space>
                 }
                 description={
@@ -475,7 +566,9 @@ const TimetableScheduler: React.FC = () => {
                         <Space>
                           <span>{schedule.date}</span>
                           {getScheduleTypeTag(schedule.type)}
-                          <span>{schedule.startTime} – {schedule.endTime}</span>
+                          <span>
+                            {schedule.startTime} – {schedule.endTime}
+                          </span>
                         </Space>
                       </List.Item>
                     )}
