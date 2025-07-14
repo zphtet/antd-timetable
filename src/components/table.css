@@ -1,0 +1,24 @@
+.schedule-table .ant-table-cell {
+  padding: 0 !important;
+}
+
+.schedule-table .ant-table-thead > tr > th {
+  padding: 8px !important;
+  border-right: 1px solid #f0f0f0;
+}
+
+.schedule-table .ant-table-tbody > tr > td {
+  border-right: 1px solid #f0f0f0;
+}
+
+.schedule-table .ant-table-cell-fix-left {
+  padding: 0 !important;
+}
+
+.time-slot:hover .remove-slot {
+  opacity: 1 !important;
+}
+
+.remove-slot:hover {
+  background-color: rgba(255, 255, 255, 0.3) !important;
+} 
