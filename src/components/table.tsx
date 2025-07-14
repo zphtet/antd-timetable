@@ -1,7 +1,7 @@
 import React, { useState, useRef, useCallback, useEffect } from "react";
-import { Table, Avatar, Dropdown, Button, Input, Space, Typography } from "antd";
+import { Table, Avatar, Dropdown, Button, Input, Space, Typography, Modal, List, Tag } from "antd";
 import type { MenuProps } from "antd";
-import { MoreOutlined, PlusOutlined, DeleteOutlined, CloseOutlined } from "@ant-design/icons";
+import { MoreOutlined, PlusOutlined, CloseOutlined, EyeOutlined } from "@ant-design/icons";
 import "./table.css";
 
 interface User {
@@ -24,6 +24,16 @@ interface SelectionArea {
   endRow: number;
   startCol: number;
   endCol: number;
+}
+
+interface ScheduleDetail {
+  staff: User;
+  schedules: {
+    date: string;
+    type: TimeSlot["type"];
+    startTime: string;
+    endTime: string;
+  }[];
 }
 
 // Function to generate dummy users
@@ -64,6 +74,7 @@ const TimetableScheduler: React.FC = () => {
   const [currentSelection, setCurrentSelection] = useState<SelectionArea | null>(null);
   const [dropdownVisible, setDropdownVisible] = useState(false);
   const [dropdownPosition, setDropdownPosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [isDetailsModalVisible, setIsDetailsModalVisible] = useState(false);
 
   const users = generateDummyUsers(numStaff);
   const dates = generateDummyDates(numDays);
@@ -192,12 +203,12 @@ const TimetableScheduler: React.FC = () => {
       label: "Break time",
       onClick: () => addSlots("break"),
     },
-    {
-      key: "clear",
-      icon: <DeleteOutlined />,
-      label: "Clear",
-      onClick: clearSelection,
-    },
+    // {
+    //   key: "clear",
+    //   icon: <DeleteOutlined />,
+    //   label: "Clear",
+    //   onClick: clearSelection,
+    // },
   ];
 
   const columns = [
@@ -293,14 +304,55 @@ const TimetableScheduler: React.FC = () => {
     staff: user,
   }));
 
+  const getScheduleDetails = (): ScheduleDetail[] => {
+    const details: ScheduleDetail[] = users.map(user => ({
+      staff: user,
+      schedules: [],
+    }));
+
+    timeSlots.forEach(slot => {
+      const staffDetail = details.find(d => d.staff.id === slot.userId);
+      if (staffDetail) {
+        staffDetail.schedules.push({
+          date: dates[slot.dateIndex],
+          type: slot.type,
+          startTime: slot.startTime || "",
+          endTime: slot.endTime || "",
+        });
+      }
+    });
+
+    return details.filter(detail => detail.schedules.length > 0);
+  };
+
+  const getScheduleTypeTag = (type: TimeSlot["type"]) => {
+    const colors = {
+      work: "green",
+      rest: "blue",
+      break: "gold",
+    };
+    return <Tag color={colors[type]}>{type.toUpperCase()}</Tag>;
+  };
+
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
       <div className="bg-white border rounded shadow-sm">
         <div className="p-4 border-b">
-          <Typography.Title level={4}>Staff Schedule</Typography.Title>
-          <Typography.Text type="secondary">
-            Drag to select cells, then choose an action.
-          </Typography.Text>
+          <div className="flex justify-between items-center">
+            <div>
+              <Typography.Title level={4}>Staff Schedule</Typography.Title>
+              <Typography.Text type="success">
+                Drag to select cells, then choose an action.
+              </Typography.Text>
+            </div>
+            <Button
+              type="primary"
+              icon={<EyeOutlined />}
+              onClick={() => setIsDetailsModalVisible(true)}
+            >
+              View Details
+            </Button>
+          </div>
         </div>
 
         <div className="p-4 border-b bg-gray-50">
@@ -349,7 +401,7 @@ const TimetableScheduler: React.FC = () => {
             pagination={false}
             scroll={{ x: "max-content" }}
             className="schedule-table"
-            style={{ 
+            style={{
               borderCollapse: "collapse",
               borderSpacing: 0
             }}
@@ -394,6 +446,46 @@ const TimetableScheduler: React.FC = () => {
           </Space>
         </div>
       </div>
+
+      <Modal
+        title="Schedule Details"
+        open={isDetailsModalVisible}
+        onCancel={() => setIsDetailsModalVisible(false)}
+        footer={null}
+        width={600}
+      >
+        <List
+          dataSource={getScheduleDetails()}
+          renderItem={(detail) => (
+            <List.Item>
+              <List.Item.Meta
+                avatar={<Avatar src={detail.staff.avatar} />}
+                title={
+                  <Space>
+                    <span>{detail.staff.name}</span>
+                    <Typography.Text type="secondary">({detail.staff.role})</Typography.Text>
+                  </Space>
+                }
+                description={
+                  <List
+                    size="small"
+                    dataSource={detail.schedules}
+                    renderItem={(schedule) => (
+                      <List.Item>
+                        <Space>
+                          <span>{schedule.date}</span>
+                          {getScheduleTypeTag(schedule.type)}
+                          <span>{schedule.startTime} – {schedule.endTime}</span>
+                        </Space>
+                      </List.Item>
+                    )}
+                  />
+                }
+              />
+            </List.Item>
+          )}
+        />
+      </Modal>
     </div>
   );
 };
