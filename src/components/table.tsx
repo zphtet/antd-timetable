@@ -326,6 +326,9 @@ const TimetableScheduler: React.FC = () => {
                   padding: 8,
                   color: "white",
                   position: "relative",
+                  ...(isSelected && {
+                    opacity: 0.6,
+                  }),
                 }}
                 className="time-slot"
               >
@@ -346,9 +349,9 @@ const TimetableScheduler: React.FC = () => {
                   }}
                 />
                 <div style={{ textTransform: "capitalize" }}>{slot.type}</div>
-                <div style={{ opacity: 0.8 }}>
+                {/* <div style={{ opacity: 0.8 }}>
                   {slot.startTime} – {slot.endTime}
-                </div>
+                </div> */}
               </div>
             )}
           </div>
@@ -566,9 +569,9 @@ const TimetableScheduler: React.FC = () => {
                         <Space>
                           <span>{schedule.date}</span>
                           {getScheduleTypeTag(schedule.type)}
-                          <span>
+                          {/* <span>
                             {schedule.startTime} – {schedule.endTime}
-                          </span>
+                          </span> */}
                         </Space>
                       </List.Item>
                     )}

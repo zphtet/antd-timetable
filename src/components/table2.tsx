@@ -9,6 +9,8 @@ import {
   Table,
   Avatar,
   Dropdown,
+  Tag,
+  List,
 } from "antd";
 import { CloseOutlined, EyeOutlined, MoreOutlined } from "@ant-design/icons";
 import { useState, useRef, useCallback, useEffect } from "react";
@@ -95,6 +97,27 @@ const AntDTable2 = () => {
 
   console.log("time SLots", timeSlots);
   console.log("selectedCells", selectedCells);
+
+  const groupedTimeSlots = () => {
+    const grouped = timeSlots.reduce(
+      (acc: { [key: string]: TimeSlot[] }, slot: TimeSlot) => {
+        if (acc[slot.userId]) {
+          acc[slot.userId].push(slot);
+        } else {
+          acc[slot.userId] = [slot];
+        }
+        return acc;
+      },
+      {}
+    ) as { [key: string]: TimeSlot[] };
+
+    return grouped;
+  };
+
+  const groupedSlots = groupedTimeSlots();
+  const groupedKeys = Object.keys(groupedSlots);
+  console.log("groupedTimeSlots", groupedSlots);
+  console.log("groupedKeys", groupedKeys);
 
   const addSlots = (type: TimeSlot["type"]) => {
     if (!currentSelection) return;
@@ -313,6 +336,10 @@ const AntDTable2 = () => {
                   width: "100%",
                   background: getTypeColor(slot.type),
 
+                  ...(isSelected && {
+                    opacity: 0.6,
+                  }),
+
                   // backgroundColor: getTypeColor(slot.type),
                 }}
                 className="time-slot"
@@ -375,7 +402,7 @@ const AntDTable2 = () => {
               type="number"
               min={1}
               max={30}
-              defaultValue={5}
+              defaultValue={6}
               onChange={(e) => {
                 setNumStaffs(Number(e.target.value));
                 console.log("input event staffs", e.target.value);
@@ -388,14 +415,21 @@ const AntDTable2 = () => {
               type="number"
               min={1}
               max={30}
-              defaultValue={5}
+              defaultValue={7}
               onChange={(e) => {
                 console.log("input event days", e.target.value);
                 setNumDays(Number(e.target.value));
               }}
             />
           </Space>
-          <Button onClick={() => alert("cleared")}>Clear All Schedules</Button>
+          <Button
+            onClick={() => {
+              setTimeSlots([]);
+              clearSelection();
+            }}
+          >
+            Clear All Schedules
+          </Button>
         </Space>
       </div>
 
@@ -492,9 +526,68 @@ const AntDTable2 = () => {
           <div>
             <Typography.Title level={4}>Staff Schedule</Typography.Title>
             <div>
-              <Typography.Text>
-                Drag to select cells, then choose an action.
-              </Typography.Text>
+              <Space
+                direction="vertical"
+                size={"small"}
+                style={{
+                  width: "100%",
+                }}
+              >
+                {groupedKeys.map((key) => {
+                  const slots = groupedSlots[key];
+                  const user = users.find((user) => user.id === key);
+                  return (
+                    <Space
+                      direction="vertical"
+                      size={"small"}
+                      style={{
+                        width: "100%",
+                      }}
+                    >
+                      <Typography.Title level={5}>
+                        {user?.name}
+                      </Typography.Title>
+                      {/* <Space direction="vertical" size={"small"}> */}
+                      <List
+                        dataSource={slots}
+                        itemLayout="vertical"
+                        style={{
+                          width: "100%",
+                        }}
+                        renderItem={(slot) => (
+                          <List.Item
+                            style={{
+                              width: "100%",
+                            }}
+                          >
+                            <Space direction="horizontal" size={"small"}>
+                              <Tag color={getTypeColor(slot.type)}>
+                                {slot.type.toUpperCase()}
+                              </Tag>
+                              <Typography.Text>
+                                {slot.startTime} - {slot.endTime}
+                              </Typography.Text>
+                            </Space>
+                          </List.Item>
+                        )}
+                      />
+                      {/* {slots.map((slot) => (
+                          <Space direction="horizontal" size={"small"}>
+                            <Typography.Text>
+                              <Tag color={getTypeColor(slot.type)}>
+                                {slot.type.toUpperCase()}
+                              </Tag>
+                            </Typography.Text>
+                            <Typography.Text>
+                              {slot.startTime} - {slot.endTime}
+                            </Typography.Text>
+                          </Space>
+                        ))} */}
+                      {/* </Space> */}
+                    </Space>
+                  );
+                })}
+              </Space>
             </div>
           </div>
         </Modal>
