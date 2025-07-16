@@ -10,6 +10,7 @@ import {
   Modal,
   List,
   Tag,
+  DatePicker,
 } from "antd";
 import type { MenuProps } from "antd";
 import {
@@ -18,7 +19,12 @@ import {
   CloseOutlined,
   EyeOutlined,
 } from "@ant-design/icons";
+import dayjs from 'dayjs';
+import type { Dayjs } from 'dayjs';
+import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import "./table.css";
+
+dayjs.extend(isSameOrBefore);
 
 interface User {
   id: string;
@@ -66,26 +72,24 @@ const generateDummyUsers = (count: number): User[] => {
   return users;
 };
 
-// Function to generate dummy dates
-const generateDummyDates = (count: number): string[] => {
+// Function to generate dates from range
+const generateDatesFromRange = (startDate: Dayjs, endDate: Dayjs): string[] => {
   const dates: string[] = [];
-  const startDate = new Date("2025-05-30T00:00:00"); // Starting from Mon 30 May 2025
-  const options: Intl.DateTimeFormatOptions = {
-    weekday: "short",
-    day: "numeric",
-  };
+  let currentDate = startDate;
 
-  for (let i = 0; i < count; i++) {
-    const currentDate = new Date(startDate);
-    currentDate.setDate(startDate.getDate() + i);
-    dates.push(currentDate.toLocaleDateString("en-US", options));
+  while (currentDate.isSameOrBefore(endDate, 'day')) {
+    dates.push(currentDate.format('ddd, MMM D')); // Format: Mon, Jan 15
+    currentDate = currentDate.add(1, 'day');
   }
   return dates;
 };
 
 const TimetableScheduler: React.FC = () => {
   const [numStaff, setNumStaff] = useState(6);
-  const [numDays, setNumDays] = useState(7);
+  const [dateRange, setDateRange] = useState<[Dayjs, Dayjs]>(() => {
+    const today = dayjs();
+    return [today, today.add(13, 'day')]; // Default to 2 weeks
+  });
   const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
   const [selectedCells, setSelectedCells] = useState<{
     [key: string]: boolean;
@@ -105,17 +109,17 @@ const TimetableScheduler: React.FC = () => {
   const [isDetailsModalVisible, setIsDetailsModalVisible] = useState(false);
 
   const users = generateDummyUsers(numStaff);
-  const dates = generateDummyDates(numDays);
+  const dates = generateDatesFromRange(dateRange[0], dateRange[1]);
 
   const tableRef = useRef<HTMLDivElement>(null);
 
   console.log("table 1 slots", timeSlots);
 
-  // Clear time slots when numStaff or numDays change
+  // Clear time slots when numStaff or dateRange changes
   useEffect(() => {
     setTimeSlots([]);
     clearSelection();
-  }, [numStaff, numDays]);
+  }, [numStaff, dateRange]);
 
   const getTimeSlot = (userId: string, dateIndex: number) =>
     timeSlots.find((s) => s.userId === userId && s.dateIndex === dateIndex);
@@ -437,21 +441,15 @@ const TimetableScheduler: React.FC = () => {
               />
             </Space>
             <Space>
-              <Typography.Text>Number of Days:</Typography.Text>
-              <Input
-                type="number"
-                min={1}
-                max={30}
-                value={numDays}
-                onChange={(e) =>
-                  setNumDays(
-                    Math.min(
-                      30,
-                      Math.max(1, Number.parseInt(e.target.value) || 1)
-                    )
-                  )
-                }
-                style={{ width: 80 }}
+              <Typography.Text>Date Range:</Typography.Text>
+              <DatePicker.RangePicker
+                value={dateRange}
+                onChange={(dates) => {
+                  if (dates) {
+                    setDateRange([dates[0]!, dates[1]!]);
+                  }
+                }}
+                allowClear={false}
               />
             </Space>
             <Button
