@@ -10,11 +10,13 @@ import {
   Avatar,
   Dropdown,
   Tag,
+  DatePicker,
   List,
 } from "antd";
 import { CloseOutlined, EyeOutlined, MoreOutlined } from "@ant-design/icons";
 import { useState, useRef, useCallback, useEffect } from "react";
 import type { MenuProps } from "antd";
+import dayjs, { Dayjs } from "dayjs";
 type User = {
   id: string;
   name: string;
@@ -65,10 +67,23 @@ const generateDummyDates = (count: number) => {
   return dates;
 };
 
+const generateDatesFromRange = (startDate: Dayjs, endDate: Dayjs): string[] => {
+  const dates: string[] = [];
+
+  let currentDate = startDate;
+
+  while (currentDate.isSameOrBefore(endDate, "day")) {
+    dates.push(currentDate.format("ddd, MMM D"));
+    currentDate = currentDate.add(1, "day");
+  }
+
+  return dates;
+};
+
 const AntDTable2 = () => {
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [numStaff, setNumStaffs] = useState(6);
-  const [numDays, setNumDays] = useState(7);
+  // const [numDays, setNumDays] = useState(7);
   const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
   const [selectedCells, setSelectedCells] = useState<{
     [key: string]: boolean;
@@ -89,11 +104,17 @@ const AntDTable2 = () => {
 
   const [dropdownVisible, setDropdownVisible] = useState(false);
 
+  const [dateRange, setDateRange] = useState<[Dayjs, Dayjs]>(() => {
+    const today = dayjs();
+    return [today, today.add(13, "day")]; // Default to 2 weeks
+  });
+
   // table ref
   const tableRef = useRef<HTMLDivElement>(null);
 
   const users = generateDummyUsers(numStaff);
-  const dates = generateDummyDates(numDays);
+  // const dates = generateDummyDates(numDays);
+  const dates = generateDatesFromRange(dateRange[0], dateRange[1]);
 
   console.log("time SLots", timeSlots);
   console.log("selectedCells", selectedCells);
@@ -410,7 +431,7 @@ const AntDTable2 = () => {
             />
           </Space>
           <Space>
-            <Typography.Text>Number of Days :</Typography.Text>
+            {/* <Typography.Text>Number of Days :</Typography.Text>
             <Input
               type="number"
               min={1}
@@ -419,6 +440,19 @@ const AntDTable2 = () => {
               onChange={(e) => {
                 console.log("input event days", e.target.value);
                 setNumDays(Number(e.target.value));
+              }}
+            /> */}
+
+            <Typography.Text>Date Range :</Typography.Text>
+
+            <DatePicker.RangePicker
+              allowClear={false}
+              value={dateRange}
+              onChange={(dates) => {
+                console.log("dates", dates);
+                if (dates) {
+                  setDateRange([dates[0]!, dates[1]!]);
+                }
               }}
             />
           </Space>

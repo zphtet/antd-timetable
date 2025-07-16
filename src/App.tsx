@@ -3,6 +3,7 @@
 // import AntDComponents from "./components/ant-d-com";
 // import AntDCom2 from "./components/ant-d-com2";
 import AntTable from "./components/table";
+import AntDTable2 from "./components/table2";
 // import AntDTable2 from "./components/table2";
 const App = () => {
   return (
@@ -15,7 +16,8 @@ const App = () => {
       </div>
       {/* <div className="timetable-container">
         <AntDTable2 />
-      </div>
+      </div> */}
+      {/* 
 
       <div
         style={{

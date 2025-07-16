@@ -19,9 +19,9 @@ import {
   CloseOutlined,
   EyeOutlined,
 } from "@ant-design/icons";
-import dayjs from 'dayjs';
-import type { Dayjs } from 'dayjs';
-import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
+import dayjs from "dayjs";
+import type { Dayjs } from "dayjs";
+import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import "./table.css";
 
 dayjs.extend(isSameOrBefore);
@@ -77,9 +77,9 @@ const generateDatesFromRange = (startDate: Dayjs, endDate: Dayjs): string[] => {
   const dates: string[] = [];
   let currentDate = startDate;
 
-  while (currentDate.isSameOrBefore(endDate, 'day')) {
-    dates.push(currentDate.format('ddd, MMM D')); // Format: Mon, Jan 15
-    currentDate = currentDate.add(1, 'day');
+  while (currentDate.isSameOrBefore(endDate, "day")) {
+    dates.push(currentDate.format("ddd, MMM D")); // Format: Mon, Jan 15
+    currentDate = currentDate.add(1, "day");
   }
   return dates;
 };
@@ -88,7 +88,7 @@ const TimetableScheduler: React.FC = () => {
   const [numStaff, setNumStaff] = useState(6);
   const [dateRange, setDateRange] = useState<[Dayjs, Dayjs]>(() => {
     const today = dayjs();
-    return [today, today.add(13, 'day')]; // Default to 2 weeks
+    return [today, today.add(13, "day")]; // Default to 2 weeks
   });
   const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
   const [selectedCells, setSelectedCells] = useState<{
@@ -403,7 +403,7 @@ const TimetableScheduler: React.FC = () => {
     <div className="p-6 bg-red-50 min-h-screen">
       <div className="bg-white border rounded shadow-sm">
         <div className="p-4 border-b">
-          <div className="flex justify-between items-center">
+          <Space size="large" direction="vertical">
             <div>
               <Typography.Title level={4}>Staff Schedule</Typography.Title>
               <Typography.Text type="success">
@@ -417,10 +417,14 @@ const TimetableScheduler: React.FC = () => {
             >
               View Details
             </Button>
-          </div>
+          </Space>
         </div>
 
-        <div className="p-4 border-b bg-gray-50">
+        <div
+          style={{
+            margin: "30px",
+          }}
+        >
           <Space size="large">
             <Space>
               <Typography.Text>Number of Staff:</Typography.Text>
