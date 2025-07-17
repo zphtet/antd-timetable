@@ -570,9 +570,11 @@ const TimetableScheduler: React.FC = () => {
 
   const getScheduleTypeTag = (shift: ShiftType) => {
     const colors = {
-      morning: "green",
-      evening: "blue",
-      night: "purple",
+      morning: "#4CAF50", // Green
+      evening: "#2196F3", // Blue
+      night: "#9C27B0", // Purple
+      rest: "#FFA726", // Orange
+      off: "#E91E63",
     };
     return <Tag color={colors[shift]}>{shift.toUpperCase()}</Tag>;
   };

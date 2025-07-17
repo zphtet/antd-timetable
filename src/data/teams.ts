@@ -59,10 +59,10 @@ export const teams: Team[] = [
         avatar: "/placeholder.svg?height=40&width=40",
         role: "Manager",
         unavailableDays: [
-          { date: "2024-02-15", status: "confirmed", reason: "Annual Leave" },
-          { date: "2024-02-16", status: "confirmed", reason: "Annual Leave" },
+          { date: "2025-07-18", status: "confirmed", reason: "Annual Leave" },
+          { date: "2025-07-19", status: "confirmed", reason: "Annual Leave" },
           {
-            date: "2024-02-20",
+            date: "2025-07-23",
             status: "pending",
             reason: "Doctor Appointment",
           },
@@ -74,8 +74,8 @@ export const teams: Team[] = [
         avatar: "/placeholder.svg?height=40&width=40",
         role: "Developer",
         unavailableDays: [
-          { date: "2024-02-18", status: "confirmed", reason: "Personal Leave" },
-          { date: "2024-02-25", status: "pending", reason: "Family Event" },
+          { date: "2025-07-21", status: "confirmed", reason: "Personal Leave" },
+          { date: "2025-08-01", status: "pending", reason: "Family Event" },
         ],
       },
       {
@@ -85,16 +85,16 @@ export const teams: Team[] = [
         role: "Designer",
         unavailableDays: [
           {
-            date: "2024-02-17",
+            date: "2025-07-20",
             status: "confirmed",
             reason: "Training Workshop",
           },
           {
-            date: "2024-02-19",
+            date: "2025-07-22",
             status: "confirmed",
             reason: "Training Workshop",
           },
-          { date: "2024-02-28", status: "pending", reason: "Conference" },
+          { date: "2025-08-15", status: "pending", reason: "Conference" },
         ],
       },
       {
@@ -103,8 +103,8 @@ export const teams: Team[] = [
         avatar: "/placeholder.svg?height=40&width=40",
         role: "Developer",
         unavailableDays: [
-          { date: "2024-02-22", status: "confirmed", reason: "Training" },
-          { date: "2024-02-23", status: "confirmed", reason: "Training" },
+          { date: "2025-07-25", status: "confirmed", reason: "Training" },
+          { date: "2025-07-26", status: "confirmed", reason: "Training" },
         ],
       },
     ],
@@ -121,11 +121,11 @@ export const teams: Team[] = [
         role: "Manager",
         unavailableDays: [
           {
-            date: "2024-02-19",
+            date: "2025-07-22",
             status: "confirmed",
             reason: "Management Meeting",
           },
-          { date: "2024-02-26", status: "pending", reason: "Team Building" },
+          { date: "2025-08-02", status: "pending", reason: "Team Building" },
         ],
       },
       {
@@ -134,9 +134,9 @@ export const teams: Team[] = [
         avatar: "/placeholder.svg?height=40&width=40",
         role: "Developer",
         unavailableDays: [
-          { date: "2024-02-21", status: "confirmed", reason: "Sick Leave" },
-          { date: "2024-02-22", status: "confirmed", reason: "Sick Leave" },
-          { date: "2024-02-27", status: "pending", reason: "Medical Check-up" },
+          { date: "2025-07-24", status: "confirmed", reason: "Sick Leave" },
+          { date: "2025-07-25", status: "confirmed", reason: "Sick Leave" },
+          { date: "2025-08-10", status: "pending", reason: "Medical Check-up" },
         ],
       },
       {
@@ -146,12 +146,12 @@ export const teams: Team[] = [
         role: "Designer",
         unavailableDays: [
           {
-            date: "2024-02-24",
+            date: "2025-07-27",
             status: "confirmed",
             reason: "Design Conference",
           },
           {
-            date: "2024-02-25",
+            date: "2025-07-28",
             status: "confirmed",
             reason: "Design Conference",
           },
@@ -163,7 +163,7 @@ export const teams: Team[] = [
         avatar: "/placeholder.svg?height=40&width=40",
         role: "Developer",
         unavailableDays: [
-          { date: "2024-02-16", status: "pending", reason: "Family Emergency" },
+          { date: "2025-07-19", status: "pending", reason: "Family Emergency" },
         ],
       },
       {
@@ -172,9 +172,9 @@ export const teams: Team[] = [
         avatar: "/placeholder.svg?height=40&width=40",
         role: "Developer",
         unavailableDays: [
-          { date: "2024-02-17", status: "confirmed", reason: "Wedding" },
-          { date: "2024-02-18", status: "confirmed", reason: "Wedding" },
-          { date: "2024-02-19", status: "confirmed", reason: "Wedding" },
+          { date: "2025-07-20", status: "confirmed", reason: "Wedding" },
+          { date: "2025-07-21", status: "confirmed", reason: "Wedding" },
+          { date: "2025-07-22", status: "confirmed", reason: "Wedding" },
         ],
       },
       {
@@ -183,7 +183,7 @@ export const teams: Team[] = [
         avatar: "/placeholder.svg?height=40&width=40",
         role: "Designer",
         unavailableDays: [
-          { date: "2024-02-24", status: "pending", reason: "Personal Matter" },
+          { date: "2025-07-27", status: "pending", reason: "Personal Matter" },
         ],
       },
     ],
@@ -199,9 +199,9 @@ export const teams: Team[] = [
         avatar: "/placeholder.svg?height=40&width=40",
         role: "Manager",
         unavailableDays: [
-          { date: "2024-02-20", status: "confirmed", reason: "Business Trip" },
-          { date: "2024-02-21", status: "confirmed", reason: "Business Trip" },
-          { date: "2024-02-22", status: "confirmed", reason: "Business Trip" },
+          { date: "2025-07-23", status: "confirmed", reason: "Business Trip" },
+          { date: "2025-07-24", status: "confirmed", reason: "Business Trip" },
+          { date: "2025-07-25", status: "confirmed", reason: "Business Trip" },
         ],
       },
       {
@@ -210,8 +210,8 @@ export const teams: Team[] = [
         avatar: "/placeholder.svg?height=40&width=40",
         role: "Developer",
         unavailableDays: [
-          { date: "2024-02-23", status: "pending", reason: "Remote Work" },
-          { date: "2024-02-26", status: "confirmed", reason: "Training" },
+          { date: "2025-07-26", status: "pending", reason: "Remote Work" },
+          { date: "2025-08-02", status: "confirmed", reason: "Training" },
         ],
       },
       {
@@ -220,8 +220,8 @@ export const teams: Team[] = [
         avatar: "/placeholder.svg?height=40&width=40",
         role: "Designer",
         unavailableDays: [
-          { date: "2024-02-15", status: "confirmed", reason: "Design Sprint" },
-          { date: "2024-02-16", status: "confirmed", reason: "Design Sprint" },
+          { date: "2025-07-18", status: "confirmed", reason: "Design Sprint" },
+          { date: "2025-07-19", status: "confirmed", reason: "Design Sprint" },
         ],
       },
     ],
@@ -238,12 +238,12 @@ export const teams: Team[] = [
         role: "Manager",
         unavailableDays: [
           {
-            date: "2024-02-28",
+            date: "2025-08-15",
             status: "confirmed",
             reason: "Strategy Meeting",
           },
           {
-            date: "2024-02-29",
+            date: "2025-08-16",
             status: "confirmed",
             reason: "Strategy Meeting",
           },
@@ -255,8 +255,8 @@ export const teams: Team[] = [
         avatar: "/placeholder.svg?height=40&width=40",
         role: "Developer",
         unavailableDays: [
-          { date: "2024-02-19", status: "pending", reason: "Study Leave" },
-          { date: "2024-02-20", status: "pending", reason: "Study Leave" },
+          { date: "2025-07-22", status: "pending", reason: "Study Leave" },
+          { date: "2025-07-23", status: "pending", reason: "Study Leave" },
         ],
       },
     ],
@@ -273,17 +273,17 @@ export const teams: Team[] = [
         role: "Manager",
         unavailableDays: [
           {
-            date: "2024-02-15",
+            date: "2025-07-18",
             status: "confirmed",
             reason: "Leadership Summit",
           },
           {
-            date: "2024-02-16",
+            date: "2025-07-19",
             status: "confirmed",
             reason: "Leadership Summit",
           },
           {
-            date: "2024-02-17",
+            date: "2025-07-20",
             status: "confirmed",
             reason: "Leadership Summit",
           },
@@ -295,8 +295,8 @@ export const teams: Team[] = [
         avatar: "/placeholder.svg?height=40&width=40",
         role: "Developer",
         unavailableDays: [
-          { date: "2024-02-22", status: "pending", reason: "Remote Work" },
-          { date: "2024-02-23", status: "pending", reason: "Remote Work" },
+          { date: "2025-07-25", status: "pending", reason: "Remote Work" },
+          { date: "2025-07-26", status: "pending", reason: "Remote Work" },
         ],
       },
       {
@@ -305,8 +305,8 @@ export const teams: Team[] = [
         avatar: "/placeholder.svg?height=40&width=40",
         role: "Designer",
         unavailableDays: [
-          { date: "2024-02-26", status: "confirmed", reason: "UX Workshop" },
-          { date: "2024-02-27", status: "confirmed", reason: "UX Workshop" },
+          { date: "2025-08-02", status: "confirmed", reason: "UX Workshop" },
+          { date: "2025-08-03", status: "confirmed", reason: "UX Workshop" },
         ],
       },
     ],
