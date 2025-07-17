@@ -17,6 +17,21 @@ export interface Side {
   name: string;
 }
 
+export type ShiftType = "morning" | "evening" | "night";
+
+export interface Shift {
+  id: ShiftType;
+  name: string;
+  startTime: string;
+  endTime: string;
+}
+
+export const shifts: Shift[] = [
+  { id: "morning", name: "Morning", startTime: "06:00", endTime: "14:00" },
+  { id: "evening", name: "Evening", startTime: "14:00", endTime: "22:00" },
+  { id: "night", name: "Night", startTime: "22:00", endTime: "06:00" }
+];
+
 export const sides: Side[] = [
   { id: "side-1", name: "Side 1" },
   { id: "side-2", name: "Side 2" },

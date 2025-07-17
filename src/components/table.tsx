@@ -23,17 +23,17 @@ import dayjs from "dayjs";
 import type { Dayjs } from "dayjs";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import "./table.css";
-import { teams, sides } from "../data/teams";
-import type { TeamMember } from "../data/teams";
+import { teams, sides, shifts } from "../data/teams";
+import type { TeamMember, ShiftType } from "../data/teams";
 
 dayjs.extend(isSameOrBefore);
 
 interface TimeSlot {
   userId: string;
   dateIndex: number;
-  type: "work" | "rest" | "break";
-  startTime?: string;
-  endTime?: string;
+  shift: ShiftType;
+  startTime: string;
+  endTime: string;
 }
 
 interface SelectionArea {
@@ -47,7 +47,7 @@ interface ScheduleDetail {
   staff: TeamMember;
   schedules: {
     date: string;
-    type: TimeSlot["type"];
+    shift: ShiftType;
     startTime: string;
     endTime: string;
   }[];
@@ -68,13 +68,15 @@ const generateDatesFromRange = (startDate: Dayjs, endDate: Dayjs): string[] => {
 const TimetableScheduler: React.FC = () => {
   const [selectedSideId, setSelectedSideId] = useState<string>(sides[0].id);
   const [selectedTeamId, setSelectedTeamId] = useState<string>(() => {
-    // Initialize with the first team of the selected side
-    const teamsInSide = teams.filter(team => team.sideId === sides[0].id);
-    return teamsInSide.length > 0 ? teamsInSide[0].id : '';
+    const teamsInSide = teams.filter((team) => team.sideId === sides[0].id);
+    return teamsInSide.length > 0 ? teamsInSide[0].id : "";
   });
+  const [selectedShifts, setSelectedShifts] = useState<ShiftType[]>([
+    "morning",
+  ]);
   const [dateRange, setDateRange] = useState<[Dayjs, Dayjs]>(() => {
     const today = dayjs();
-    return [today, today.add(13, "day")]; // Default to 2 weeks
+    return [today, today.add(13, "day")];
   });
   const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
   const [selectedCells, setSelectedCells] = useState<{
@@ -95,13 +97,16 @@ const TimetableScheduler: React.FC = () => {
   const [isDetailsModalVisible, setIsDetailsModalVisible] = useState(false);
 
   const selectedTeam = teams.find((team) => team.id === selectedTeamId)!;
-  const availableTeams = teams.filter(team => team.sideId === selectedSideId);
+  const availableTeams = teams.filter((team) => team.sideId === selectedSideId);
   const dates = generateDatesFromRange(dateRange[0], dateRange[1]);
 
   // Update selected team when side changes
   useEffect(() => {
-    const teamsInSide = teams.filter(team => team.sideId === selectedSideId);
-    if (teamsInSide.length > 0 && !teamsInSide.some(team => team.id === selectedTeamId)) {
+    const teamsInSide = teams.filter((team) => team.sideId === selectedSideId);
+    if (
+      teamsInSide.length > 0 &&
+      !teamsInSide.some((team) => team.id === selectedTeamId)
+    ) {
       setSelectedTeamId(teamsInSide[0].id);
     }
   }, [selectedSideId]);
@@ -119,12 +124,14 @@ const TimetableScheduler: React.FC = () => {
   const getTimeSlot = (userId: string, dateIndex: number) =>
     timeSlots.find((s) => s.userId === userId && s.dateIndex === dateIndex);
 
-  const getTypeColor = (type: TimeSlot["type"]) =>
-    ({
-      work: "#4CAF50",
-      rest: "#2196F3",
-      break: "#FFC107",
-    }[type]);
+  const getShiftColor = (shift: ShiftType) => {
+    const colors = {
+      morning: "#4CAF50",  // Green
+      evening: "#2196F3",  // Blue
+      night: "#9C27B0",    // Purple
+    };
+    return colors[shift];
+  };
 
   const handleMouseDown = (row: number, col: number, e: React.MouseEvent) => {
     e.preventDefault();
@@ -192,8 +199,8 @@ const TimetableScheduler: React.FC = () => {
     setSelectedCells(newSelected);
   };
 
-  const addSlots = (type: TimeSlot["type"]) => {
-    if (!currentSelection) return;
+  const addSlots = () => {
+    if (!currentSelection || selectedShifts.length === 0) return;
     const newSlots: TimeSlot[] = [];
     for (let r = currentSelection.startRow; r <= currentSelection.endRow; r++) {
       for (
@@ -202,23 +209,19 @@ const TimetableScheduler: React.FC = () => {
         c++
       ) {
         if (r < selectedTeam.members.length && c < dates.length) {
+          const shift = shifts.find((s) => s.id === selectedShifts[0])!;
           newSlots.push({
             userId: selectedTeam.members[r].id,
             dateIndex: c,
-            type,
-            startTime:
-              type === "work" ? "09:00" : type === "rest" ? "12:00" : "15:00",
-            endTime:
-              type === "work" ? "17:00" : type === "rest" ? "13:00" : "15:30",
+            shift: shift.id,
+            startTime: shift.startTime,
+            endTime: shift.endTime,
           });
         }
       }
     }
     setTimeSlots((prev) => [
       ...prev.filter(
-        // This line filters out any existing time slots that would be replaced by the new slots.
-        // In other words, for each existing slot 's', we keep it only if there is NOT a new slot 'n'
-        // with the same userId and dateIndex. This prevents duplicate or overlapping slots for the same user and date.
         (s) =>
           !newSlots.some(
             (n) => n.userId === s.userId && n.dateIndex === s.dateIndex
@@ -237,29 +240,11 @@ const TimetableScheduler: React.FC = () => {
 
   const dropdownItems: MenuProps["items"] = [
     {
-      key: "work",
+      key: "assign",
       icon: <PlusOutlined />,
-      label: "Work time",
-      onClick: () => addSlots("work"),
+      label: "Assign shift",
+      onClick: () => addSlots(),
     },
-    {
-      key: "rest",
-      icon: <PlusOutlined />,
-      label: "Rest time",
-      onClick: () => addSlots("rest"),
-    },
-    {
-      key: "break",
-      icon: <PlusOutlined />,
-      label: "Break time",
-      onClick: () => addSlots("break"),
-    },
-    // {
-    //   key: "clear",
-    //   icon: <DeleteOutlined />,
-    //   label: "Clear",
-    //   onClick: clearSelection,
-    // },
   ];
 
   const columns = [
@@ -294,7 +279,7 @@ const TimetableScheduler: React.FC = () => {
         const isSelected = selectedCells[`${rowIndex}-${index}`];
 
         const handleRemoveSlot = (e: React.MouseEvent) => {
-          e.stopPropagation(); // Prevent cell selection when clicking remove
+          e.stopPropagation();
           setTimeSlots((prev) =>
             prev.filter(
               (s) =>
@@ -325,7 +310,7 @@ const TimetableScheduler: React.FC = () => {
               <div
                 style={{
                   height: "100%",
-                  background: getTypeColor(slot.type),
+                  background: getShiftColor(slot.shift),
                   padding: 8,
                   color: "white",
                   position: "relative",
@@ -351,10 +336,12 @@ const TimetableScheduler: React.FC = () => {
                     cursor: "pointer",
                   }}
                 />
-                <div style={{ textTransform: "capitalize" }}>{slot.type}</div>
-                {/* <div style={{ opacity: 0.8 }}>
+                <div style={{ textTransform: "capitalize" }}>
+                  {shifts.find(s => s.id === slot.shift)?.name}
+                </div>
+                <div style={{ opacity: 0.8, fontSize: '12px' }}>
                   {slot.startTime} – {slot.endTime}
-                </div> */}
+                </div>
               </div>
             )}
           </div>
@@ -379,7 +366,7 @@ const TimetableScheduler: React.FC = () => {
       if (staffDetail) {
         staffDetail.schedules.push({
           date: dates[slot.dateIndex],
-          type: slot.type,
+          shift: slot.shift,
           startTime: slot.startTime || "",
           endTime: slot.endTime || "",
         });
@@ -389,13 +376,22 @@ const TimetableScheduler: React.FC = () => {
     return details.filter((detail) => detail.schedules.length > 0);
   };
 
-  const getScheduleTypeTag = (type: TimeSlot["type"]) => {
+  const getScheduleTypeTag = (shift: ShiftType) => {
     const colors = {
-      work: "green",
-      rest: "blue",
-      break: "gold",
+      morning: "green",
+      evening: "blue",
+      night: "purple",
     };
-    return <Tag color={colors[type]}>{type.toUpperCase()}</Tag>;
+    return <Tag color={colors[shift]}>{shift.toUpperCase()}</Tag>;
+  };
+
+  // Handle shift selection change
+  const handleShiftChange = (newShifts: ShiftType[]) => {
+    // Prevent removing the last selected shift
+    if (newShifts.length === 0) {
+      return;
+    }
+    setSelectedShifts(newShifts);
   };
 
   return (
@@ -424,51 +420,70 @@ const TimetableScheduler: React.FC = () => {
             margin: "30px",
           }}
         >
-          <Space size="large">
-            <Space>
-              <Typography.Text>Side:</Typography.Text>
-              <Select
-                value={selectedSideId}
-                onChange={setSelectedSideId}
-                style={{ width: 120 }}
-                options={sides.map((side) => ({
-                  value: side.id,
-                  label: side.name,
-                }))}
-              />
-            </Space>
-            <Space>
-              <Typography.Text>Team:</Typography.Text>
-              <Select
-                value={selectedTeamId}
-                onChange={setSelectedTeamId}
-                style={{ width: 200 }}
-                options={availableTeams.map((team) => ({
-                  value: team.id,
-                  label: `${team.name} (${team.members.length} members)`,
-                }))}
-              />
-            </Space>
-            <Space>
-              <Typography.Text>Date Range:</Typography.Text>
-              <DatePicker.RangePicker
-                value={dateRange}
-                onChange={(dates) => {
-                  if (dates) {
-                    setDateRange([dates[0]!, dates[1]!]);
-                  }
+          <Space size="large" direction="vertical">
+            <Space size={"large"}>
+              <Space>
+                <Typography.Text>Side:</Typography.Text>
+                <Select
+                  value={selectedSideId}
+                  onChange={setSelectedSideId}
+                  style={{ width: 120 }}
+                  options={sides.map((side) => ({
+                    value: side.id,
+                    label: side.name,
+                  }))}
+                />
+              </Space>
+              <Space>
+                <Typography.Text>Team:</Typography.Text>
+                <Select
+                  value={selectedTeamId}
+                  onChange={setSelectedTeamId}
+                  style={{ width: 200 }}
+                  options={availableTeams.map((team) => ({
+                    value: team.id,
+                    label: `${team.name} (${team.members.length} members)`,
+                  }))}
+                />
+              </Space>
+              <Button
+                onClick={() => {
+                  setTimeSlots([]);
+                  clearSelection();
                 }}
-                allowClear={false}
-              />
+              >
+                Clear All Schedules
+              </Button>
             </Space>
-            <Button
-              onClick={() => {
-                setTimeSlots([]);
-                clearSelection();
-              }}
-            >
-              Clear All Schedules
-            </Button>
+            <Space size={"large"}>
+              <Space>
+                <Typography.Text>Date Range:</Typography.Text>
+                <DatePicker.RangePicker
+                  value={dateRange}
+                  onChange={(dates) => {
+                    if (dates) {
+                      setDateRange([dates[0]!, dates[1]!]);
+                    }
+                  }}
+                  allowClear={false}
+                />
+              </Space>
+              <Space>
+                <Typography.Text>Shifts:</Typography.Text>
+                <Select
+                  mode="multiple"
+                  value={selectedShifts}
+                  onChange={handleShiftChange}
+                  style={{ maxWidth: 800 }}
+                  options={shifts.map((shift) => ({
+                    value: shift.id,
+                    label: `${shift.name} (${shift.startTime}-${shift.endTime})`,
+                    disabled: selectedShifts.length === 1 && selectedShifts[0] === shift.id // Disable the last selected option
+                  }))}
+                  placeholder="Select shifts"
+                />
+              </Space>
+            </Space>
           </Space>
         </div>
 
@@ -509,39 +524,19 @@ const TimetableScheduler: React.FC = () => {
         <div className="p-4 border-t bg-gray-50">
           <Space size="large">
             <Typography.Text strong>Legend:</Typography.Text>
-            <Space>
-              <div
-                style={{
-                  width: 12,
-                  height: 12,
-                  borderRadius: 4,
-                  background: "#4CAF50",
-                }}
-              />
-              <span>Work</span>
-            </Space>
-            <Space>
-              <div
-                style={{
-                  width: 12,
-                  height: 12,
-                  borderRadius: 4,
-                  background: "#2196F3",
-                }}
-              />
-              <span>Rest</span>
-            </Space>
-            <Space>
-              <div
-                style={{
-                  width: 12,
-                  height: 12,
-                  borderRadius: 4,
-                  background: "#FFC107",
-                }}
-              />
-              <span>Break</span>
-            </Space>
+            {shifts.map((shift) => (
+              <Space key={shift.id}>
+                <div
+                  style={{
+                    width: 12,
+                    height: 12,
+                    borderRadius: 4,
+                    background: getShiftColor(shift.id),
+                  }}
+                />
+                <span>{`${shift.name} (${shift.startTime}-${shift.endTime})`}</span>
+              </Space>
+            ))}
           </Space>
         </div>
       </div>
@@ -575,7 +570,7 @@ const TimetableScheduler: React.FC = () => {
                       <List.Item>
                         <Space>
                           <span>{schedule.date}</span>
-                          {getScheduleTypeTag(schedule.type)}
+                          {getScheduleTypeTag(schedule.shift)}
                           {/* <span>
                             {schedule.startTime} – {schedule.endTime}
                           </span> */}
