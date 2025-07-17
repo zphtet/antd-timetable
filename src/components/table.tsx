@@ -31,9 +31,11 @@ dayjs.extend(isSameOrBefore);
 interface TimeSlot {
   userId: string;
   dateIndex: number;
-  shift: ShiftType;
-  startTime: string;
-  endTime: string;
+  shifts: {
+    shiftType: ShiftType;
+    startTime: string;
+    endTime: string;
+  }[];
 }
 
 interface SelectionArea {
@@ -121,7 +123,7 @@ const TimetableScheduler: React.FC = () => {
 
   console.log("table 1 slots", timeSlots);
 
-  const getTimeSlot = (userId: string, dateIndex: number) =>
+  const getTimeSlots = (userId: string, dateIndex: number) =>
     timeSlots.find((s) => s.userId === userId && s.dateIndex === dateIndex);
 
   const getShiftColor = (shift: ShiftType) => {
@@ -202,40 +204,75 @@ const TimetableScheduler: React.FC = () => {
   const addSlots = () => {
     if (!currentSelection || selectedShifts.length === 0) return;
     const newSlots: TimeSlot[] = [];
+    
     for (let r = currentSelection.startRow; r <= currentSelection.endRow; r++) {
-      for (
-        let c = currentSelection.startCol;
-        c <= currentSelection.endCol;
-        c++
-      ) {
+      for (let c = currentSelection.startCol; c <= currentSelection.endCol; c++) {
         if (r < selectedTeam.members.length && c < dates.length) {
-          const shift = shifts.find((s) => s.id === selectedShifts[0])!;
+          const shiftData = selectedShifts.map(shiftId => {
+            const shift = shifts.find(s => s.id === shiftId)!;
+            return {
+              shiftType: shift.id,
+              startTime: shift.startTime,
+              endTime: shift.endTime
+            };
+          });
+
+          // Always create a new slot with current selected shifts
           newSlots.push({
             userId: selectedTeam.members[r].id,
             dateIndex: c,
-            shift: shift.id,
-            startTime: shift.startTime,
-            endTime: shift.endTime,
+            shifts: shiftData
           });
         }
       }
     }
-    setTimeSlots((prev) => [
-      ...prev.filter(
-        (s) =>
-          !newSlots.some(
-            (n) => n.userId === s.userId && n.dateIndex === s.dateIndex
-          )
-      ),
-      ...newSlots,
-    ]);
+
+    setTimeSlots(prev => {
+      // Remove any existing slots in the selection area and add new ones
+      const slotsOutsideSelection = prev.filter(slot => {
+        const row = selectedTeam.members.findIndex(member => member.id === slot.userId);
+        const col = slot.dateIndex;
+        
+        return !(
+          row >= currentSelection!.startRow && 
+          row <= currentSelection!.endRow && 
+          col >= currentSelection!.startCol && 
+          col <= currentSelection!.endCol
+        );
+      });
+
+      return [...slotsOutsideSelection, ...newSlots];
+    });
+    
     clearSelection();
-  };
+};
 
   const clearSelection = () => {
     setCurrentSelection(null);
     setSelectedCells({});
     setDropdownVisible(false);
+  };
+
+  const clearSelectedSlots = () => {
+    if (!currentSelection) return;
+    
+    setTimeSlots(prev => 
+      prev.filter(slot => {
+        // Check if the current slot is within the selection area
+        const row = selectedTeam.members.findIndex(member => member.id === slot.userId);
+        const col = slot.dateIndex;
+        
+        const isInSelection = 
+          row >= currentSelection.startRow && 
+          row <= currentSelection.endRow && 
+          col >= currentSelection.startCol && 
+          col <= currentSelection.endCol;
+        
+        // Keep slots that are NOT in the selection area
+        return !isInSelection;
+      })
+    );
+    clearSelection();
   };
 
   const dropdownItems: MenuProps["items"] = [
@@ -245,7 +282,28 @@ const TimetableScheduler: React.FC = () => {
       label: "Assign shift",
       onClick: () => addSlots(),
     },
+    {
+      key: "delete",
+      icon: <CloseOutlined />,
+      label: "Delete shifts",
+      onClick: () => clearSelectedSlots(),
+      danger: true,
+    },
   ];
+
+  const handleRemoveShift = (userId: string, dateIndex: number, shiftToRemove: ShiftType) => {
+    setTimeSlots(prev => 
+      prev.map(slot => {
+        if (slot.userId === userId && slot.dateIndex === dateIndex) {
+          // Remove the specified shift
+          const updatedShifts = slot.shifts.filter(s => s.shiftType !== shiftToRemove);
+          // If there are shifts left, return updated slot, otherwise return null
+          return updatedShifts.length > 0 ? { ...slot, shifts: updatedShifts } : null;
+        }
+        return slot;
+      }).filter((slot): slot is TimeSlot => slot !== null) // Remove null slots and maintain type safety
+    );
+  };
 
   const columns = [
     {
@@ -275,21 +333,8 @@ const TimetableScheduler: React.FC = () => {
         record: { key: string; staff: TeamMember },
         rowIndex: number
       ) => {
-        const slot = getTimeSlot(selectedTeam.members[rowIndex].id, index);
+        const slot = getTimeSlots(selectedTeam.members[rowIndex].id, index);
         const isSelected = selectedCells[`${rowIndex}-${index}`];
-
-        const handleRemoveSlot = (e: React.MouseEvent) => {
-          e.stopPropagation();
-          setTimeSlots((prev) =>
-            prev.filter(
-              (s) =>
-                !(
-                  s.userId === selectedTeam.members[rowIndex].id &&
-                  s.dateIndex === index
-                )
-            )
-          );
-        };
 
         return (
           <div
@@ -304,46 +349,85 @@ const TimetableScheduler: React.FC = () => {
               borderTop: "none",
               borderLeft: "none",
               position: "relative",
+              overflow: "hidden",
             }}
           >
-            {slot && (
-              <div
-                style={{
-                  height: "100%",
-                  background: getShiftColor(slot.shift),
-                  padding: 8,
-                  color: "white",
-                  position: "relative",
-                  ...(isSelected && {
-                    opacity: 0.6,
-                  }),
-                }}
-                className="time-slot"
-              >
-                <CloseOutlined
-                  className="remove-slot"
-                  onClick={handleRemoveSlot}
+            {slot?.shifts.map((shiftData, idx) => {
+              const totalShifts = slot.shifts.length;
+              const shiftInfo = shifts.find((s) => s.id === shiftData.shiftType);
+              const showTimeWithLabel = totalShifts === 3;
+
+              return (
+                <div
+                  key={`${shiftData.shiftType}-${idx}`}
                   style={{
                     position: "absolute",
-                    top: 4,
-                    right: 4,
-                    fontSize: 12,
-                    opacity: 0,
-                    transition: "opacity 0.2s",
-                    backgroundColor: "rgba(255, 255, 255, 0.2)",
+                    top: `${(idx * 100) / totalShifts}%`,
+                    left: 0,
+                    width: "100%",
+                    height: `${100 / totalShifts}%`,
+                    background: getShiftColor(shiftData.shiftType),
                     padding: 4,
-                    borderRadius: "50%",
-                    cursor: "pointer",
+                    color: "white",
+                    borderBottom: idx < totalShifts - 1 ? "1px solid rgba(255,255,255,0.2)" : "none",
+                    ...(isSelected && {
+                      opacity: 0.6,
+                    }),
                   }}
-                />
-                <div style={{ textTransform: "capitalize" }}>
-                  {shifts.find(s => s.id === slot.shift)?.name}
+                  className="time-slot"
+                >
+                  <CloseOutlined
+                    className="remove-slot"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleRemoveShift(
+                        selectedTeam.members[rowIndex].id,
+                        index,
+                        shiftData.shiftType
+                      );
+                    }}
+                    style={{
+                      position: "absolute",
+                      top: 4,
+                      right: 4,
+                      fontSize: 12,
+                      opacity: 0,
+                      transition: "opacity 0.2s",
+                      backgroundColor: "rgba(255, 255, 255, 0.2)",
+                      padding: 4,
+                      borderRadius: "50%",
+                      cursor: "pointer",
+                      zIndex: 2,
+                    }}
+                  />
+                  <div
+                    style={{
+                      fontSize: "12px",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      textShadow: "0 0 2px rgba(0,0,0,0.5)",
+                      lineHeight: showTimeWithLabel ? "26px" : "1.2",
+                    }}
+                  >
+                    {showTimeWithLabel 
+                      ? `${shiftInfo?.name} (${shiftData.startTime} - ${shiftData.endTime})`
+                      : (
+                        <>
+                          <div>{shiftInfo?.name}</div>
+                          <div style={{
+                            opacity: 0.8,
+                            fontSize: "11px",
+                          }}>
+                            {shiftData.startTime} - {shiftData.endTime}
+                          </div>
+                        </>
+                      )
+                    }
+                  </div>
                 </div>
-                <div style={{ opacity: 0.8, fontSize: '12px' }}>
-                  {slot.startTime} – {slot.endTime}
-                </div>
-              </div>
-            )}
+              );
+            })}
           </div>
         );
       },
@@ -364,11 +448,13 @@ const TimetableScheduler: React.FC = () => {
     timeSlots.forEach((slot) => {
       const staffDetail = details.find((d) => d.staff.id === slot.userId);
       if (staffDetail) {
-        staffDetail.schedules.push({
-          date: dates[slot.dateIndex],
-          shift: slot.shift,
-          startTime: slot.startTime || "",
-          endTime: slot.endTime || "",
+        slot.shifts.forEach(shift => {
+          staffDetail.schedules.push({
+            date: dates[slot.dateIndex],
+            shift: shift.shiftType,
+            startTime: shift.startTime || "",
+            endTime: shift.endTime || "",
+          });
         });
       }
     });
