@@ -135,7 +135,20 @@ const TimetableScheduler: React.FC = () => {
     return colors[shift];
   };
 
+  const isDateUnavailable = (member: TeamMember, dateIndex: number) => {
+    const currentDate = dateRange[0].add(dateIndex, 'day').format('YYYY-MM-DD');
+    return member.unavailableDays.find(day => day.date === currentDate);
+  };
+
   const handleMouseDown = (row: number, col: number, e: React.MouseEvent) => {
+    const member = selectedTeam.members[row];
+    const unavailableDay = isDateUnavailable(member, col);
+    
+    if (unavailableDay) {
+      // Don't allow selection of unavailable days
+      return;
+    }
+
     e.preventDefault();
     setIsSelecting(true);
     setSelectionStart({ row, col });
@@ -150,6 +163,27 @@ const TimetableScheduler: React.FC = () => {
 
   const handleMouseEnter = (row: number, col: number) => {
     if (isSelecting && selectionStart) {
+      // Check if any cell in the selection range is unavailable
+      let hasUnavailableDays = false;
+      const startRow = Math.min(selectionStart.row, row);
+      const endRow = Math.max(selectionStart.row, row);
+      const startCol = Math.min(selectionStart.col, col);
+      const endCol = Math.max(selectionStart.col, col);
+
+      for (let r = startRow; r <= endRow; r++) {
+        for (let c = startCol; c <= endCol; c++) {
+          if (isDateUnavailable(selectedTeam.members[r], c)) {
+            hasUnavailableDays = true;
+            break;
+          }
+        }
+        if (hasUnavailableDays) break;
+      }
+
+      if (hasUnavailableDays) {
+        return; // Don't update selection if any cell is unavailable
+      }
+
       const newSelection = {
         startRow: Math.min(selectionStart.row, row),
         endRow: Math.max(selectionStart.row, row),
@@ -335,6 +369,7 @@ const TimetableScheduler: React.FC = () => {
       ) => {
         const slot = getTimeSlots(selectedTeam.members[rowIndex].id, index);
         const isSelected = selectedCells[`${rowIndex}-${index}`];
+        const unavailableDay = isDateUnavailable(selectedTeam.members[rowIndex], index);
 
         return (
           <div
@@ -342,8 +377,14 @@ const TimetableScheduler: React.FC = () => {
             onMouseEnter={() => handleMouseEnter(rowIndex, index)}
             style={{
               height: 80,
-              background: isSelected ? "#E6F4FF" : "white",
-              cursor: "pointer",
+              background: unavailableDay 
+                ? unavailableDay.status === 'confirmed' 
+                  ? 'rgba(255, 77, 79, 0.15)' // Light red for confirmed
+                  : 'rgba(250, 173, 20, 0.15)' // Light orange for pending
+                : isSelected 
+                  ? "#E6F4FF" 
+                  : "white",
+              cursor: unavailableDay ? 'not-allowed' : 'pointer',
               padding: 0,
               border: "1px solid #f0f0f0",
               borderTop: "none",
@@ -352,6 +393,36 @@ const TimetableScheduler: React.FC = () => {
               overflow: "hidden",
             }}
           >
+            {unavailableDay && (
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  padding: '4px',
+                  color: unavailableDay.status === 'confirmed' ? '#ff4d4f' : '#faad14',
+                  fontSize: '12px',
+                  textAlign: 'center',
+                  backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                  zIndex: 1,
+                }}
+              >
+                <div style={{ fontWeight: 'bold' }}>
+                  {unavailableDay.status === 'confirmed' ? 'Unavailable' : 'Pending'}
+                </div>
+                {unavailableDay.reason && (
+                  <div style={{ fontSize: '11px', marginTop: '2px' }}>
+                    {unavailableDay.reason}
+                  </div>
+                )}
+              </div>
+            )}
             {slot?.shifts.map((shiftData, idx) => {
               const totalShifts = slot.shifts.length;
               const shiftInfo = shifts.find((s) => s.id === shiftData.shiftType);
@@ -623,6 +694,30 @@ const TimetableScheduler: React.FC = () => {
                 <span>{`${shift.name} (${shift.startTime}-${shift.endTime})`}</span>
               </Space>
             ))}
+            <Space>
+              <div
+                style={{
+                  width: 12,
+                  height: 12,
+                  borderRadius: 4,
+                  background: 'rgba(255, 77, 79, 0.15)',
+                  border: '1px solid #ff4d4f',
+                }}
+              />
+              <span>Unavailable (Confirmed)</span>
+            </Space>
+            <Space>
+              <div
+                style={{
+                  width: 12,
+                  height: 12,
+                  borderRadius: 4,
+                  background: 'rgba(250, 173, 20, 0.15)',
+                  border: '1px solid #faad14',
+                }}
+              />
+              <span>Unavailable (Pending)</span>
+            </Space>
           </Space>
         </div>
       </div>
