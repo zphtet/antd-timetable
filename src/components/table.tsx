@@ -585,6 +585,31 @@ const TimetableScheduler: React.FC = () => {
     if (newShifts.length === 0) {
       return;
     }
+
+    // Check if rest or off day is being selected
+    const hasRest = newShifts.includes("rest");
+    const hasOff = newShifts.includes("off");
+    const hasOtherShifts = newShifts.some(shift => !["rest", "off"].includes(shift));
+
+    // If rest or off day is selected, don't allow other shifts
+    if ((hasRest || hasOff) && hasOtherShifts) {
+      // If rest/off is being added, only keep rest/off
+      if (newShifts[newShifts.length - 1] === "rest" || newShifts[newShifts.length - 1] === "off") {
+        setSelectedShifts([newShifts[newShifts.length - 1]]);
+      } else {
+        // If other shift is being added, filter out rest/off
+        setSelectedShifts(newShifts.filter(shift => !["rest", "off"].includes(shift)));
+      }
+      return;
+    }
+
+    // Don't allow both rest and off days
+    if (hasRest && hasOff) {
+      // Keep the most recently added one
+      setSelectedShifts([newShifts[newShifts.length - 1]]);
+      return;
+    }
+
     setSelectedShifts(newShifts);
   };
 
