@@ -202,6 +202,51 @@ const TimetableScheduler: React.FC = () => {
     }
   };
 
+  const isAnySelectedCellAssigned = () => {
+    if (!currentSelection) return false;
+    
+    for (let r = currentSelection.startRow; r <= currentSelection.endRow; r++) {
+      for (let c = currentSelection.startCol; c <= currentSelection.endCol; c++) {
+        const slot = timeSlots.find(
+          (s) => s.userId === selectedTeam.members[r].id && s.dateIndex === c
+        );
+        if (slot) return true;
+      }
+    }
+    return false;
+  };
+
+  const dropdownItems: MenuProps["items"] = (() => {
+    const hasAssignedCells = isAnySelectedCellAssigned();
+
+    if (hasAssignedCells) {
+      return [
+        {
+          key: "update",
+          icon: <PlusOutlined />,
+          label: "Update shifts",
+          onClick: () => addSlots(),
+        },
+        {
+          key: "delete",
+          icon: <CloseOutlined />,
+          label: "Delete shifts",
+          onClick: () => clearSelectedSlots(),
+          danger: true,
+        },
+      ];
+    }
+
+    return [
+      {
+        key: "assign",
+        icon: <PlusOutlined />,
+        label: "Assign shift",
+        onClick: () => addSlots(),
+      },
+    ];
+  })();
+
   const handleMouseUp = useCallback(
     (e: MouseEvent) => {
       if (isSelecting && currentSelection && tableRef.current) {
@@ -318,22 +363,6 @@ const TimetableScheduler: React.FC = () => {
     );
     clearSelection();
   };
-
-  const dropdownItems: MenuProps["items"] = [
-    {
-      key: "assign",
-      icon: <PlusOutlined />,
-      label: "Assign shift",
-      onClick: () => addSlots(),
-    },
-    {
-      key: "delete",
-      icon: <CloseOutlined />,
-      label: "Delete shifts",
-      onClick: () => clearSelectedSlots(),
-      danger: true,
-    },
-  ];
 
   const handleRemoveShift = (
     userId: string,
