@@ -128,22 +128,24 @@ const TimetableScheduler: React.FC = () => {
 
   const getShiftColor = (shift: ShiftType) => {
     const colors = {
-      morning: "#4CAF50",  // Green
-      evening: "#2196F3",  // Blue
-      night: "#9C27B0",    // Purple
+      morning: "#4CAF50", // Green
+      evening: "#2196F3", // Blue
+      night: "#9C27B0", // Purple
+      rest: "#FFA726", // Orange
+      off: "#E91E63", // Purple
     };
     return colors[shift];
   };
 
   const isDateUnavailable = (member: TeamMember, dateIndex: number) => {
-    const currentDate = dateRange[0].add(dateIndex, 'day').format('YYYY-MM-DD');
-    return member.unavailableDays.find(day => day.date === currentDate);
+    const currentDate = dateRange[0].add(dateIndex, "day").format("YYYY-MM-DD");
+    return member.unavailableDays.find((day) => day.date === currentDate);
   };
 
   const handleMouseDown = (row: number, col: number, e: React.MouseEvent) => {
     const member = selectedTeam.members[row];
     const unavailableDay = isDateUnavailable(member, col);
-    
+
     if (unavailableDay) {
       // Don't allow selection of unavailable days
       return;
@@ -238,16 +240,20 @@ const TimetableScheduler: React.FC = () => {
   const addSlots = () => {
     if (!currentSelection || selectedShifts.length === 0) return;
     const newSlots: TimeSlot[] = [];
-    
+
     for (let r = currentSelection.startRow; r <= currentSelection.endRow; r++) {
-      for (let c = currentSelection.startCol; c <= currentSelection.endCol; c++) {
+      for (
+        let c = currentSelection.startCol;
+        c <= currentSelection.endCol;
+        c++
+      ) {
         if (r < selectedTeam.members.length && c < dates.length) {
-          const shiftData = selectedShifts.map(shiftId => {
-            const shift = shifts.find(s => s.id === shiftId)!;
+          const shiftData = selectedShifts.map((shiftId) => {
+            const shift = shifts.find((s) => s.id === shiftId)!;
             return {
               shiftType: shift.id,
               startTime: shift.startTime,
-              endTime: shift.endTime
+              endTime: shift.endTime,
             };
           });
 
@@ -255,31 +261,33 @@ const TimetableScheduler: React.FC = () => {
           newSlots.push({
             userId: selectedTeam.members[r].id,
             dateIndex: c,
-            shifts: shiftData
+            shifts: shiftData,
           });
         }
       }
     }
 
-    setTimeSlots(prev => {
+    setTimeSlots((prev) => {
       // Remove any existing slots in the selection area and add new ones
-      const slotsOutsideSelection = prev.filter(slot => {
-        const row = selectedTeam.members.findIndex(member => member.id === slot.userId);
+      const slotsOutsideSelection = prev.filter((slot) => {
+        const row = selectedTeam.members.findIndex(
+          (member) => member.id === slot.userId
+        );
         const col = slot.dateIndex;
-        
+
         return !(
-          row >= currentSelection!.startRow && 
-          row <= currentSelection!.endRow && 
-          col >= currentSelection!.startCol && 
+          row >= currentSelection!.startRow &&
+          row <= currentSelection!.endRow &&
+          col >= currentSelection!.startCol &&
           col <= currentSelection!.endCol
         );
       });
 
       return [...slotsOutsideSelection, ...newSlots];
     });
-    
+
     clearSelection();
-};
+  };
 
   const clearSelection = () => {
     setCurrentSelection(null);
@@ -289,19 +297,21 @@ const TimetableScheduler: React.FC = () => {
 
   const clearSelectedSlots = () => {
     if (!currentSelection) return;
-    
-    setTimeSlots(prev => 
-      prev.filter(slot => {
+
+    setTimeSlots((prev) =>
+      prev.filter((slot) => {
         // Check if the current slot is within the selection area
-        const row = selectedTeam.members.findIndex(member => member.id === slot.userId);
+        const row = selectedTeam.members.findIndex(
+          (member) => member.id === slot.userId
+        );
         const col = slot.dateIndex;
-        
-        const isInSelection = 
-          row >= currentSelection.startRow && 
-          row <= currentSelection.endRow && 
-          col >= currentSelection.startCol && 
+
+        const isInSelection =
+          row >= currentSelection.startRow &&
+          row <= currentSelection.endRow &&
+          col >= currentSelection.startCol &&
           col <= currentSelection.endCol;
-        
+
         // Keep slots that are NOT in the selection area
         return !isInSelection;
       })
@@ -325,17 +335,28 @@ const TimetableScheduler: React.FC = () => {
     },
   ];
 
-  const handleRemoveShift = (userId: string, dateIndex: number, shiftToRemove: ShiftType) => {
-    setTimeSlots(prev => 
-      prev.map(slot => {
-        if (slot.userId === userId && slot.dateIndex === dateIndex) {
-          // Remove the specified shift
-          const updatedShifts = slot.shifts.filter(s => s.shiftType !== shiftToRemove);
-          // If there are shifts left, return updated slot, otherwise return null
-          return updatedShifts.length > 0 ? { ...slot, shifts: updatedShifts } : null;
-        }
-        return slot;
-      }).filter((slot): slot is TimeSlot => slot !== null) // Remove null slots and maintain type safety
+  const handleRemoveShift = (
+    userId: string,
+    dateIndex: number,
+    shiftToRemove: ShiftType
+  ) => {
+    setTimeSlots(
+      (prev) =>
+        prev
+          .map((slot) => {
+            if (slot.userId === userId && slot.dateIndex === dateIndex) {
+              // Remove the specified shift
+              const updatedShifts = slot.shifts.filter(
+                (s) => s.shiftType !== shiftToRemove
+              );
+              // If there are shifts left, return updated slot, otherwise return null
+              return updatedShifts.length > 0
+                ? { ...slot, shifts: updatedShifts }
+                : null;
+            }
+            return slot;
+          })
+          .filter((slot): slot is TimeSlot => slot !== null) // Remove null slots and maintain type safety
     );
   };
 
@@ -369,7 +390,10 @@ const TimetableScheduler: React.FC = () => {
       ) => {
         const slot = getTimeSlots(selectedTeam.members[rowIndex].id, index);
         const isSelected = selectedCells[`${rowIndex}-${index}`];
-        const unavailableDay = isDateUnavailable(selectedTeam.members[rowIndex], index);
+        const unavailableDay = isDateUnavailable(
+          selectedTeam.members[rowIndex],
+          index
+        );
 
         return (
           <div
@@ -377,14 +401,14 @@ const TimetableScheduler: React.FC = () => {
             onMouseEnter={() => handleMouseEnter(rowIndex, index)}
             style={{
               height: 80,
-              background: unavailableDay 
-                ? unavailableDay.status === 'confirmed' 
-                  ? 'rgba(255, 77, 79, 0.15)' // Light red for confirmed
-                  : 'rgba(250, 173, 20, 0.15)' // Light orange for pending
-                : isSelected 
-                  ? "#E6F4FF" 
-                  : "white",
-              cursor: unavailableDay ? 'not-allowed' : 'pointer',
+              background: unavailableDay
+                ? unavailableDay.status === "confirmed"
+                  ? "rgba(255, 77, 79, 0.15)" // Light red for confirmed
+                  : "rgba(250, 173, 20, 0.15)" // Light orange for pending
+                : isSelected
+                ? "#E6F4FF"
+                : "white",
+              cursor: unavailableDay ? "not-allowed" : "pointer",
               padding: 0,
               border: "1px solid #f0f0f0",
               borderTop: "none",
@@ -396,28 +420,33 @@ const TimetableScheduler: React.FC = () => {
             {unavailableDay && (
               <div
                 style={{
-                  position: 'absolute',
+                  position: "absolute",
                   top: 0,
                   left: 0,
-                  width: '100%',
-                  height: '100%',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  padding: '4px',
-                  color: unavailableDay.status === 'confirmed' ? '#ff4d4f' : '#faad14',
-                  fontSize: '12px',
-                  textAlign: 'center',
-                  backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                  width: "100%",
+                  height: "100%",
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  padding: "4px",
+                  color:
+                    unavailableDay.status === "confirmed"
+                      ? "#ff4d4f"
+                      : "#faad14",
+                  fontSize: "12px",
+                  textAlign: "center",
+                  backgroundColor: "rgba(255, 255, 255, 0.8)",
                   zIndex: 1,
                 }}
               >
-                <div style={{ fontWeight: 'bold' }}>
-                  {unavailableDay.status === 'confirmed' ? 'Unavailable' : 'Pending'}
+                <div style={{ fontWeight: "bold" }}>
+                  {unavailableDay.status === "confirmed"
+                    ? "Unavailable"
+                    : "Pending"}
                 </div>
                 {unavailableDay.reason && (
-                  <div style={{ fontSize: '11px', marginTop: '2px' }}>
+                  <div style={{ fontSize: "11px", marginTop: "2px" }}>
                     {unavailableDay.reason}
                   </div>
                 )}
@@ -425,7 +454,9 @@ const TimetableScheduler: React.FC = () => {
             )}
             {slot?.shifts.map((shiftData, idx) => {
               const totalShifts = slot.shifts.length;
-              const shiftInfo = shifts.find((s) => s.id === shiftData.shiftType);
+              const shiftInfo = shifts.find(
+                (s) => s.id === shiftData.shiftType
+              );
               const showTimeWithLabel = totalShifts === 3;
 
               return (
@@ -440,7 +471,10 @@ const TimetableScheduler: React.FC = () => {
                     background: getShiftColor(shiftData.shiftType),
                     padding: 4,
                     color: "white",
-                    borderBottom: idx < totalShifts - 1 ? "1px solid rgba(255,255,255,0.2)" : "none",
+                    borderBottom:
+                      idx < totalShifts - 1
+                        ? "1px solid rgba(255,255,255,0.2)"
+                        : "none",
                     ...(isSelected && {
                       opacity: 0.6,
                     }),
@@ -481,20 +515,21 @@ const TimetableScheduler: React.FC = () => {
                       lineHeight: showTimeWithLabel ? "26px" : "1.2",
                     }}
                   >
-                    {showTimeWithLabel 
-                      ? `${shiftInfo?.name} (${shiftData.startTime} - ${shiftData.endTime})`
-                      : (
-                        <>
-                          <div>{shiftInfo?.name}</div>
-                          <div style={{
+                    {showTimeWithLabel ? (
+                      `${shiftInfo?.name} (${shiftData.startTime} - ${shiftData.endTime})`
+                    ) : (
+                      <>
+                        <div>{shiftInfo?.name}</div>
+                        <div
+                          style={{
                             opacity: 0.8,
                             fontSize: "11px",
-                          }}>
-                            {shiftData.startTime} - {shiftData.endTime}
-                          </div>
-                        </>
-                      )
-                    }
+                          }}
+                        >
+                          {shiftData.startTime} - {shiftData.endTime}
+                        </div>
+                      </>
+                    )}
                   </div>
                 </div>
               );
@@ -519,7 +554,7 @@ const TimetableScheduler: React.FC = () => {
     timeSlots.forEach((slot) => {
       const staffDetail = details.find((d) => d.staff.id === slot.userId);
       if (staffDetail) {
-        slot.shifts.forEach(shift => {
+        slot.shifts.forEach((shift) => {
           staffDetail.schedules.push({
             date: dates[slot.dateIndex],
             shift: shift.shiftType,
@@ -580,7 +615,7 @@ const TimetableScheduler: React.FC = () => {
           <Space size="large" direction="vertical">
             <Space size={"large"}>
               <Space>
-                <Typography.Text>Side:</Typography.Text>
+                <Typography.Text>Site:</Typography.Text>
                 <Select
                   value={selectedSideId}
                   onChange={setSelectedSideId}
@@ -635,7 +670,9 @@ const TimetableScheduler: React.FC = () => {
                   options={shifts.map((shift) => ({
                     value: shift.id,
                     label: `${shift.name} (${shift.startTime}-${shift.endTime})`,
-                    disabled: selectedShifts.length === 1 && selectedShifts[0] === shift.id // Disable the last selected option
+                    disabled:
+                      selectedShifts.length === 1 &&
+                      selectedShifts[0] === shift.id, // Disable the last selected option
                   }))}
                   placeholder="Select shifts"
                 />
@@ -700,8 +737,8 @@ const TimetableScheduler: React.FC = () => {
                   width: 12,
                   height: 12,
                   borderRadius: 4,
-                  background: 'rgba(255, 77, 79, 0.15)',
-                  border: '1px solid #ff4d4f',
+                  background: "rgba(255, 77, 79, 0.15)",
+                  border: "1px solid #ff4d4f",
                 }}
               />
               <span>Unavailable (Confirmed)</span>
@@ -712,8 +749,8 @@ const TimetableScheduler: React.FC = () => {
                   width: 12,
                   height: 12,
                   borderRadius: 4,
-                  background: 'rgba(250, 173, 20, 0.15)',
-                  border: '1px solid #faad14',
+                  background: "rgba(250, 173, 20, 0.15)",
+                  border: "1px solid #faad14",
                 }}
               />
               <span>Unavailable (Pending)</span>
