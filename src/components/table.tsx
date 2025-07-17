@@ -4,13 +4,13 @@ import {
   Avatar,
   Dropdown,
   Button,
-  Input,
   Space,
   Typography,
   Modal,
   List,
   Tag,
   DatePicker,
+  Select,
 } from "antd";
 import type { MenuProps } from "antd";
 import {
@@ -23,15 +23,10 @@ import dayjs from "dayjs";
 import type { Dayjs } from "dayjs";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import "./table.css";
+import { teams, sides } from "../data/teams";
+import type { TeamMember } from "../data/teams";
 
 dayjs.extend(isSameOrBefore);
-
-interface User {
-  id: string;
-  name: string;
-  avatar?: string;
-  role?: string;
-}
 
 interface TimeSlot {
   userId: string;
@@ -49,7 +44,7 @@ interface SelectionArea {
 }
 
 interface ScheduleDetail {
-  staff: User;
+  staff: TeamMember;
   schedules: {
     date: string;
     type: TimeSlot["type"];
@@ -57,20 +52,6 @@ interface ScheduleDetail {
     endTime: string;
   }[];
 }
-
-// Function to generate dummy users
-const generateDummyUsers = (count: number): User[] => {
-  const users: User[] = [];
-  for (let i = 0; i < count; i++) {
-    users.push({
-      id: `user-${i + 1}`,
-      name: `Staff Member ${i + 1}`,
-      avatar: `/placeholder.svg?height=40&width=40`,
-      role: i % 3 === 0 ? "Manager" : i % 3 === 1 ? "Developer" : "Designer",
-    });
-  }
-  return users;
-};
 
 // Function to generate dates from range
 const generateDatesFromRange = (startDate: Dayjs, endDate: Dayjs): string[] => {
@@ -85,7 +66,12 @@ const generateDatesFromRange = (startDate: Dayjs, endDate: Dayjs): string[] => {
 };
 
 const TimetableScheduler: React.FC = () => {
-  const [numStaff, setNumStaff] = useState(6);
+  const [selectedSideId, setSelectedSideId] = useState<string>(sides[0].id);
+  const [selectedTeamId, setSelectedTeamId] = useState<string>(() => {
+    // Initialize with the first team of the selected side
+    const teamsInSide = teams.filter(team => team.sideId === sides[0].id);
+    return teamsInSide.length > 0 ? teamsInSide[0].id : '';
+  });
   const [dateRange, setDateRange] = useState<[Dayjs, Dayjs]>(() => {
     const today = dayjs();
     return [today, today.add(13, "day")]; // Default to 2 weeks
@@ -108,18 +94,27 @@ const TimetableScheduler: React.FC = () => {
   }>({ x: 0, y: 0 });
   const [isDetailsModalVisible, setIsDetailsModalVisible] = useState(false);
 
-  const users = generateDummyUsers(numStaff);
+  const selectedTeam = teams.find((team) => team.id === selectedTeamId)!;
+  const availableTeams = teams.filter(team => team.sideId === selectedSideId);
   const dates = generateDatesFromRange(dateRange[0], dateRange[1]);
+
+  // Update selected team when side changes
+  useEffect(() => {
+    const teamsInSide = teams.filter(team => team.sideId === selectedSideId);
+    if (teamsInSide.length > 0 && !teamsInSide.some(team => team.id === selectedTeamId)) {
+      setSelectedTeamId(teamsInSide[0].id);
+    }
+  }, [selectedSideId]);
+
+  // Clear time slots when team or dateRange changes
+  useEffect(() => {
+    setTimeSlots([]);
+    clearSelection();
+  }, [selectedTeamId, dateRange]);
 
   const tableRef = useRef<HTMLDivElement>(null);
 
   console.log("table 1 slots", timeSlots);
-
-  // Clear time slots when numStaff or dateRange changes
-  useEffect(() => {
-    setTimeSlots([]);
-    clearSelection();
-  }, [numStaff, dateRange]);
 
   const getTimeSlot = (userId: string, dateIndex: number) =>
     timeSlots.find((s) => s.userId === userId && s.dateIndex === dateIndex);
@@ -206,9 +201,9 @@ const TimetableScheduler: React.FC = () => {
         c <= currentSelection.endCol;
         c++
       ) {
-        if (r < users.length && c < dates.length) {
+        if (r < selectedTeam.members.length && c < dates.length) {
           newSlots.push({
-            userId: users[r].id,
+            userId: selectedTeam.members[r].id,
             dateIndex: c,
             type,
             startTime:
@@ -274,7 +269,7 @@ const TimetableScheduler: React.FC = () => {
       key: "staff",
       fixed: "left" as const,
       width: 200,
-      render: (user: User) => (
+      render: (user: TeamMember) => (
         <Space style={{ padding: "8px" }}>
           <Avatar src={user.avatar} />
           <div>
@@ -292,17 +287,21 @@ const TimetableScheduler: React.FC = () => {
       width: 150,
       render: (
         _: unknown,
-        record: { key: string; staff: User },
+        record: { key: string; staff: TeamMember },
         rowIndex: number
       ) => {
-        const slot = getTimeSlot(users[rowIndex].id, index);
+        const slot = getTimeSlot(selectedTeam.members[rowIndex].id, index);
         const isSelected = selectedCells[`${rowIndex}-${index}`];
 
         const handleRemoveSlot = (e: React.MouseEvent) => {
           e.stopPropagation(); // Prevent cell selection when clicking remove
           setTimeSlots((prev) =>
             prev.filter(
-              (s) => !(s.userId === users[rowIndex].id && s.dateIndex === index)
+              (s) =>
+                !(
+                  s.userId === selectedTeam.members[rowIndex].id &&
+                  s.dateIndex === index
+                )
             )
           );
         };
@@ -364,14 +363,14 @@ const TimetableScheduler: React.FC = () => {
     })),
   ];
 
-  const data = users.map((user) => ({
-    key: user.id,
-    staff: user,
+  const data = selectedTeam.members.map((member) => ({
+    key: member.id,
+    staff: member,
   }));
 
   const getScheduleDetails = (): ScheduleDetail[] => {
-    const details: ScheduleDetail[] = users.map((user) => ({
-      staff: user,
+    const details: ScheduleDetail[] = selectedTeam.members.map((member) => ({
+      staff: member,
       schedules: [],
     }));
 
@@ -427,21 +426,27 @@ const TimetableScheduler: React.FC = () => {
         >
           <Space size="large">
             <Space>
-              <Typography.Text>Number of Staff:</Typography.Text>
-              <Input
-                type="number"
-                min={1}
-                max={50}
-                value={numStaff}
-                onChange={(e) =>
-                  setNumStaff(
-                    Math.min(
-                      50,
-                      Math.max(1, Number.parseInt(e.target.value) || 1)
-                    )
-                  )
-                }
-                style={{ width: 80 }}
+              <Typography.Text>Side:</Typography.Text>
+              <Select
+                value={selectedSideId}
+                onChange={setSelectedSideId}
+                style={{ width: 120 }}
+                options={sides.map((side) => ({
+                  value: side.id,
+                  label: side.name,
+                }))}
+              />
+            </Space>
+            <Space>
+              <Typography.Text>Team:</Typography.Text>
+              <Select
+                value={selectedTeamId}
+                onChange={setSelectedTeamId}
+                style={{ width: 200 }}
+                options={availableTeams.map((team) => ({
+                  value: team.id,
+                  label: `${team.name} (${team.members.length} members)`,
+                }))}
               />
             </Space>
             <Space>

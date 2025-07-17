@@ -16,21 +16,40 @@ import {
   Avatar,
   Alert,
   Calendar,
-  Carousel,
+  // Carousel,
   Collapse,
   type CollapseProps,
+  Tour,
   QRCode,
   Segmented,
   Statistic,
   Timeline,
+  Tree,
+  type TourProps,
+  type TreeDataNode,
+  Drawer,
+  Progress,
+  type ProgressProps,
+  Result,
+  Skeleton,
+  Spin,
 } from "antd";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { Dayjs } from "dayjs";
 import dayjs from "dayjs";
+
+import {
+  CheckCircleFilled,
+  LoadingOutlined,
+  SmileFilled,
+  StepForwardOutlined,
+} from "@ant-design/icons";
 const AntDCom2 = () => {
   const [radioValue, setRadioValue] = useState<number>(1);
   const [count, setCount] = useState<number>(20);
   const [treeValue, setTreeValue] = useState<string>();
+
+  const [messageApi, contextHolder] = message.useMessage();
 
   const [value, setValue] = useState(() => dayjs("2017-01-25"));
   const [selectedValue, setSelectedValue] = useState(() => dayjs("2017-01-25"));
@@ -110,9 +129,221 @@ const AntDCom2 = () => {
     textAlign: "center",
     background: "#364d79",
   };
+
+  const ref1 = useRef<HTMLDivElement>(null);
+  const ref2 = useRef<HTMLDivElement>(null);
+  const ref3 = useRef<HTMLDivElement>(null);
+  // const ref4 = useRef<HTMLDivElement>(null);
+  // const ref5 = useRef<HTMLDivElement>(null);
+  // const ref6 = useRef<HTMLDivElement>(null);
+
+  const steps: TourProps["steps"] = [
+    {
+      title: "Upload Your Image",
+      description: "Upload your image to the system",
+      target: () => ref1.current!,
+    },
+    {
+      title: "Save Your Image",
+      description: "Save your image to the system",
+      target: () => ref2.current!,
+    },
+    {
+      title: "View Your Image",
+      description: "View your image in the system",
+      target: () => ref3.current!,
+    },
+  ];
+  const [isTourOpen, setIsTourOpen] = useState(false);
+
+  const treeData: TreeDataNode[] = [
+    {
+      title: "Node-1",
+      key: "Node-1",
+      children: [
+        {
+          title: "Node-1-1",
+          key: "Node-1-1",
+          children: [
+            {
+              title: "Node-1-1-1",
+              key: "Node-1-1-1",
+            },
+            {
+              title: "Node-1-1-2",
+              key: "Node-1-1-2",
+              children: [
+                {
+                  title: "Node-1-1-2-1",
+                  key: "Node-1-1-2-1",
+                },
+              ],
+            },
+          ],
+        },
+        {
+          title: "Node-1-2",
+          key: "Node-1-2",
+        },
+      ],
+    },
+    {
+      title: "Node-2",
+      key: "Node-2",
+      children: [
+        {
+          title: "Node-2-1",
+          key: "Node-2-1",
+        },
+        {
+          title: "Node-2-2",
+          key: "Node-2-2",
+          children: [
+            {
+              title: "Node-2-2-1",
+              key: "Node-2-2-1",
+            },
+            {
+              title: "Node-2-2-2",
+              key: "Node-2-2-2",
+            },
+          ],
+        },
+      ],
+    },
+    {
+      title: "Node-3",
+      key: "Node-3",
+      children: [
+        {
+          title: "Node-3-1",
+          key: "Node-3-1",
+        },
+      ],
+    },
+  ];
+  const [open, setOpen] = useState(false);
+
+  const info = () => {
+    messageApi
+      .open({
+        key: "hello",
+        type: "loading",
+        content: "Hello World",
+        duration: 2.5,
+        icon: <LoadingOutlined />,
+      })
+      .then(() => message.success("Loading succeed"));
+  };
+
+  const mutationMessage = () => {
+    messageApi.open({
+      key: "mutation",
+      type: "loading",
+      content: "Loading...",
+      // duration: 2.5,
+      // icon: <LoadingOutlined />,
+    });
+    setTimeout(() => {
+      messageApi.open({
+        key: "mutation",
+        type: "success",
+        content: "Loading succeed",
+        icon: (
+          <CheckCircleFilled
+            style={{
+              color: "green",
+            }}
+          />
+        ),
+      });
+    }, 2000);
+  };
+
+  const conicColors: ProgressProps["strokeColor"] = {
+    "0%": "#87d068",
+    "50%": "#ffe58f",
+    "100%": "#ffccc7",
+  };
+
+  const [percentage, setPercentage] = useState(30);
   return (
     <div>
+      {contextHolder}
       <Space direction="vertical">
+        <Spin tip="Loading" />
+        <Skeleton.Button />
+        <Skeleton.Avatar active />
+        <Skeleton.Input active />
+        <Progress
+          percent={percentage}
+          type="circle"
+          // strokeColor={conicColors}
+          // status="normal"
+        />
+        <Button onClick={() => setPercentage(percentage + 10)}>
+          Increment
+        </Button>
+        <Button onClick={() => setPercentage(percentage - 10)}>Decrease</Button>
+
+        <Progress percent={30} type="line" />
+        <Result
+          status="info"
+          icon={<SmileFilled style={{ color: "blue" }} />}
+          title="Successfully"
+          subTitle="You can now use your account"
+          extra={<Button type="primary">Back Home</Button>}
+        />
+        <Button onClick={info}>Info Message</Button>
+        <Button onClick={mutationMessage}>Mutation Message</Button>
+        <Button type="primary" onClick={() => setOpen(true)}>
+          Open Drawer
+        </Button>
+        <Drawer
+          title={"Basic Drawer"}
+          open={open}
+          onClose={() => setOpen(false)}
+          placement="right"
+          footer={
+            <div>
+              <p>this is footer</p>
+            </div>
+          }
+          children={
+            <div>
+              <p>
+                Lorem ipsum dolor sit amet consectetur, adipisicing elit.
+                Ratione necessitatibus incidunt omnis magnam voluptatem
+                temporibus unde illo architecto impedit ipsam.
+              </p>
+            </div>
+          }
+        />
+        <Tree.DirectoryTree
+          checkable
+          treeData={treeData}
+          onCheck={(checkedKeys, info) => {
+            console.log("Checked Keys", checkedKeys, info);
+          }}
+          onSelect={(selectedKeys, info) => {
+            console.log("Selected Keys", selectedKeys, info);
+          }}
+        />
+        <Button type="primary" onClick={() => setIsTourOpen(true)}>
+          Begin Tour
+        </Button>
+        <Space>
+          <Button ref={ref1}>Upload</Button>
+          <Button ref={ref2}>Save</Button>
+          <Button ref={ref3}>View</Button>
+        </Space>
+        <Tour
+          open={isTourOpen}
+          onClose={() => {
+            setIsTourOpen(false);
+          }}
+          steps={steps}
+        />
         <Timeline
           items={[
             {
