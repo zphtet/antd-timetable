@@ -14,9 +14,9 @@ const App = () => {
       {/* <h1>Hello World</h1>
       <Button type="primary">Click me</Button> */}
 
-      <div className="timetable-container">
+      {/* <div className="timetable-container">
         <AntTable />
-      </div>
+      </div> */}
 
       <div className="timetable-container">
         <p>JSX Version</p>

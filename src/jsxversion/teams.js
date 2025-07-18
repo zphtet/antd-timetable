@@ -21,7 +21,7 @@ export const teams = [
       {
         id: "a-1",
         name: "John Smith",
-        avatar: "/src/jsxversion/assets/13.png",
+        avatar: "/assets/13.png",
         role: "Manager",
         unavailableDays: [
           { date: "2025-07-18", status: "confirmed", reason: "Annual Leave" },
@@ -36,7 +36,7 @@ export const teams = [
       {
         id: "a-2",
         name: "Alice Johnson",
-        avatar: "/src/jsxversion/assets/1.png",
+        avatar: "/assets/1.png",
         role: "Developer",
         unavailableDays: [
           { date: "2025-07-21", status: "confirmed", reason: "Personal Leave" },
@@ -46,7 +46,7 @@ export const teams = [
       {
         id: "a-3",
         name: "Bob Wilson",
-        avatar: "/src/jsxversion/assets/7.png",
+        avatar: "/assets/7.png",
         role: "Designer",
         unavailableDays: [
           {
@@ -65,7 +65,7 @@ export const teams = [
       {
         id: "a-4",
         name: "Carol Brown",
-        avatar: "/src/jsxversion/assets/2.png",
+        avatar: "/assets/2.png",
         role: "Developer",
         unavailableDays: [
           { date: "2025-07-25", status: "confirmed", reason: "Training" },
@@ -75,7 +75,7 @@ export const teams = [
       {
         id: "a-5",
         name: "Sarah Parker",
-        avatar: "/src/jsxversion/assets/3.png",
+        avatar: "/assets/3.png",
         role: "Developer",
         unavailableDays: [
           { date: "2025-07-28", status: "confirmed", reason: "Vacation" },
@@ -85,7 +85,7 @@ export const teams = [
       {
         id: "a-6",
         name: "Michael Chang",
-        avatar: "/src/jsxversion/assets/8.png",
+        avatar: "/assets/8.png",
         role: "Designer",
         unavailableDays: [
           { date: "2025-08-05", status: "pending", reason: "Design Workshop" },
@@ -94,14 +94,14 @@ export const teams = [
       {
         id: "a-7",
         name: "Rachel Green",
-        avatar: "/src/jsxversion/assets/4.png",
+        avatar: "/assets/4.png",
         role: "Developer",
         unavailableDays: [],
       },
       {
         id: "a-8",
         name: "Tom Ford",
-        avatar: "/src/jsxversion/assets/10.png",
+        avatar: "/assets/10.png",
         role: "Developer",
         unavailableDays: [
           { date: "2025-08-10", status: "confirmed", reason: "Family Event" },
@@ -117,7 +117,7 @@ export const teams = [
       {
         id: "b-1",
         name: "David Lee",
-        avatar: "/src/jsxversion/assets/11.png",
+        avatar: "/assets/11.png",
         role: "Manager",
         unavailableDays: [
           {
@@ -131,7 +131,7 @@ export const teams = [
       {
         id: "b-2",
         name: "Emma Davis",
-        avatar: "/src/jsxversion/assets/5.png",
+        avatar: "/assets/5.png",
         role: "Developer",
         unavailableDays: [
           { date: "2025-07-24", status: "confirmed", reason: "Sick Leave" },
@@ -142,7 +142,7 @@ export const teams = [
       {
         id: "b-3",
         name: "Frank Miller",
-        avatar: "/src/jsxversion/assets/14.png",
+        avatar: "/assets/14.png",
         role: "Designer",
         unavailableDays: [
           {
@@ -160,7 +160,7 @@ export const teams = [
       {
         id: "b-4",
         name: "Grace Taylor",
-        avatar: "/src/jsxversion/assets/6.png",
+        avatar: "/assets/6.png",
         role: "Developer",
         unavailableDays: [
           { date: "2025-07-19", status: "pending", reason: "Family Emergency" },
@@ -169,7 +169,7 @@ export const teams = [
       {
         id: "b-5",
         name: "Henry White",
-        avatar: "/src/jsxversion/assets/7.png",
+        avatar: "/assets/7.png",
         role: "Developer",
         unavailableDays: [
           { date: "2025-07-20", status: "confirmed", reason: "Wedding" },
@@ -180,7 +180,7 @@ export const teams = [
       {
         id: "b-6",
         name: "Ivy Chen",
-        avatar: "/src/jsxversion/assets/9.png",
+        avatar: "/assets/9.png",
         role: "Designer",
         unavailableDays: [
           { date: "2025-07-27", status: "pending", reason: "Personal Matter" },
@@ -189,7 +189,7 @@ export const teams = [
       {
         id: "b-7",
         name: "Sophie Wang",
-        avatar: "/src/jsxversion/assets/12.png",
+        avatar: "/assets/12.png",
         role: "Developer",
         unavailableDays: [
           { date: "2025-08-01", status: "confirmed", reason: "Training" },
@@ -198,14 +198,14 @@ export const teams = [
       {
         id: "b-8",
         name: "Lucas Kim",
-        avatar: "/src/jsxversion/assets/8.png",
+        avatar: "/assets/8.png",
         role: "Designer",
         unavailableDays: [],
       },
       {
         id: "b-9",
         name: "Emily Zhang",
-        avatar: "/src/jsxversion/assets/15.png",
+        avatar: "/assets/15.png",
         role: "Developer",
         unavailableDays: [
           { date: "2025-07-30", status: "pending", reason: "Personal" },
@@ -221,14 +221,14 @@ export const teams = [
       {
         id: "c-1",
         name: "James Wilson",
-        avatar: "/src/jsxversion/assets/13.png",
+        avatar: "/assets/13.png",
         role: "Manager",
         unavailableDays: [],
       },
       {
         id: "c-2",
         name: "Linda Martinez",
-        avatar: "/src/jsxversion/assets/16.png",
+        avatar: "/assets/16.png",
         role: "Developer",
         unavailableDays: [],
       },
@@ -242,14 +242,14 @@ export const teams = [
       {
         id: "d-1",
         name: "Kevin Anderson",
-        avatar: "/src/jsxversion/assets/11.png",
+        avatar: "/assets/11.png",
         role: "Manager",
         unavailableDays: [],
       },
       {
         id: "d-2",
         name: "Patricia Thomas",
-        avatar: "/src/jsxversion/assets/1.png",
+        avatar: "/assets/1.png",
         role: "Developer",
         unavailableDays: [],
       },
