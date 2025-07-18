@@ -1,0 +1,47 @@
+.schedule-table .ant-table-cell {
+  padding: 0 !important;
+}
+
+.schedule-table .ant-table-thead > tr > th {
+  padding: 8px !important;
+  border-right: 1px solid #f0f0f0;
+}
+
+.schedule-table .ant-table-tbody > tr > td {
+  border-right: 1px solid #f0f0f0;
+}
+
+.schedule-table .ant-table-cell-fix-left {
+  padding: 0 !important;
+}
+
+.time-slot:hover .remove-slot {
+  opacity: 1 !important;
+}
+
+.remove-slot:hover {
+  background-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Schedule Details Modal Styles */
+.ant-modal-content .ant-list-item-meta {
+  align-items: flex-start;
+}
+
+.ant-modal-content .ant-list-item-meta-description .ant-list-item {
+  padding: 8px 0;
+}
+
+.ant-modal-content .ant-list-item {
+  padding: 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.ant-modal-content .ant-list-item:last-child {
+  border-bottom: none;
+}
+
+.ant-modal-content .ant-tag {
+  min-width: 60px;
+  text-align: center;
+} 

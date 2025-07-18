@@ -4,6 +4,7 @@
 // import AntDCom2 from "./components/ant-d-com2";
 import AntDCom2 from "./components/ant-d-com2";
 import AntTable from "./components/table";
+import TimetableScheduler from "./components/table";
 import { Watermark } from "antd";
 // import AntDTable2 from "./components/table2";
 // import AntDTable2 from "./components/table2";
@@ -15,6 +16,11 @@ const App = () => {
 
       <div className="timetable-container">
         <AntTable />
+      </div>
+
+      <div className="timetable-container">
+        <p>JSX Version</p>
+        <TimetableScheduler />
       </div>
 
       {/* <Watermark content={"Ant Design is Great"}>
