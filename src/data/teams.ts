@@ -107,6 +107,41 @@ export const teams: Team[] = [
           { date: "2025-07-26", status: "confirmed", reason: "Training" },
         ],
       },
+      {
+        id: "a-5",
+        name: "Sarah Parker",
+        avatar: "/placeholder.svg?height=40&width=40",
+        role: "Developer",
+        unavailableDays: [
+          { date: "2025-07-28", status: "confirmed", reason: "Vacation" },
+          { date: "2025-07-29", status: "confirmed", reason: "Vacation" },
+        ],
+      },
+      {
+        id: "a-6",
+        name: "Michael Chang",
+        avatar: "/placeholder.svg?height=40&width=40",
+        role: "Designer",
+        unavailableDays: [
+          { date: "2025-08-05", status: "pending", reason: "Design Workshop" },
+        ],
+      },
+      {
+        id: "a-7",
+        name: "Rachel Green",
+        avatar: "/placeholder.svg?height=40&width=40",
+        role: "Developer",
+        unavailableDays: [],
+      },
+      {
+        id: "a-8",
+        name: "Tom Ford",
+        avatar: "/placeholder.svg?height=40&width=40",
+        role: "Developer",
+        unavailableDays: [
+          { date: "2025-08-10", status: "confirmed", reason: "Family Event" },
+        ],
+      },
     ],
   },
   {
@@ -186,6 +221,38 @@ export const teams: Team[] = [
           { date: "2025-07-27", status: "pending", reason: "Personal Matter" },
         ],
       },
+      {
+        id: "b-7",
+        name: "Sophie Wang",
+        avatar: "/placeholder.svg?height=40&width=40",
+        role: "Developer",
+        unavailableDays: [
+          { date: "2025-08-01", status: "confirmed", reason: "Training" },
+        ],
+      },
+      {
+        id: "b-8",
+        name: "Lucas Kim",
+        avatar: "/placeholder.svg?height=40&width=40",
+        role: "Designer",
+        unavailableDays: [],
+      },
+      {
+        id: "b-9",
+        name: "Emily Zhang",
+        avatar: "/placeholder.svg?height=40&width=40",
+        role: "Developer",
+        unavailableDays: [
+          { date: "2025-07-30", status: "pending", reason: "Personal" },
+        ],
+      },
+      {
+        id: "b-10",
+        name: "Daniel Park",
+        avatar: "/placeholder.svg?height=40&width=40",
+        role: "Developer",
+        unavailableDays: [],
+      },
     ],
   },
   {
@@ -224,6 +291,38 @@ export const teams: Team[] = [
           { date: "2025-07-19", status: "confirmed", reason: "Design Sprint" },
         ],
       },
+      {
+        id: "c-4",
+        name: "Nina Patel",
+        avatar: "/placeholder.svg?height=40&width=40",
+        role: "Developer",
+        unavailableDays: [],
+      },
+      {
+        id: "c-5",
+        name: "Oliver Singh",
+        avatar: "/placeholder.svg?height=40&width=40",
+        role: "Designer",
+        unavailableDays: [
+          { date: "2025-08-05", status: "confirmed", reason: "Conference" },
+        ],
+      },
+      {
+        id: "c-6",
+        name: "Zoe Martinez",
+        avatar: "/placeholder.svg?height=40&width=40",
+        role: "Developer",
+        unavailableDays: [],
+      },
+      {
+        id: "c-7",
+        name: "Ryan Thompson",
+        avatar: "/placeholder.svg?height=40&width=40",
+        role: "Developer",
+        unavailableDays: [
+          { date: "2025-07-29", status: "pending", reason: "Medical" },
+        ],
+      },
     ],
   },
   {
@@ -257,6 +356,38 @@ export const teams: Team[] = [
         unavailableDays: [
           { date: "2025-07-22", status: "pending", reason: "Study Leave" },
           { date: "2025-07-23", status: "pending", reason: "Study Leave" },
+        ],
+      },
+      {
+        id: "d-4",
+        name: "Ava Wilson",
+        avatar: "/placeholder.svg?height=40&width=40",
+        role: "Developer",
+        unavailableDays: [],
+      },
+      {
+        id: "d-5",
+        name: "Leo Garcia",
+        avatar: "/placeholder.svg?height=40&width=40",
+        role: "Designer",
+        unavailableDays: [
+          { date: "2025-08-02", status: "confirmed", reason: "Workshop" },
+        ],
+      },
+      {
+        id: "d-6",
+        name: "Maya Rodriguez",
+        avatar: "/placeholder.svg?height=40&width=40",
+        role: "Developer",
+        unavailableDays: [],
+      },
+      {
+        id: "d-7",
+        name: "Felix Chen",
+        avatar: "/placeholder.svg?height=40&width=40",
+        role: "Developer",
+        unavailableDays: [
+          { date: "2025-07-31", status: "pending", reason: "Personal" },
         ],
       },
     ],
