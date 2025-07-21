@@ -256,3 +256,63 @@ export const teams = [
     ],
   },
 ]; 
+
+
+export const  SHIFT_LIMITS_BY_DAY = {
+  0: {
+    // Sunday
+    morning: 2,
+    evening: 3,
+    night: 5,
+    rest: 999,
+    off: 999,
+  },
+  1: {
+    // Monday
+    morning: 4,
+    evening: 6,
+    night: 8,
+    rest: 999,
+    off: 999,
+  },
+  2: {
+    // Tuesday
+    morning: 4,
+    evening: 6,
+    night: 8,
+    rest: 999,
+    off: 999,
+  },
+  3: {
+    // Wednesday
+    morning: 4,
+    evening: 6,
+    night: 8,
+    rest: 999,
+    off: 999,
+  },
+  4: {
+    // Thursday
+    morning: 4,
+    evening: 6,
+    night: 8,
+    rest: 999,
+    off: 999,
+  },
+  5: {
+    // Friday
+    morning: 5,
+    evening: 8,
+    night: 10,
+    rest: 999,
+    off: 999,
+  },
+  6: {
+    // Saturday
+    morning: 3,
+    evening: 4,
+    night: 6,
+    rest: 999,
+    off: 999,
+  },
+};

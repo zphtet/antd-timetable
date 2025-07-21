@@ -1,4 +1,10 @@
-import React, { useState, useRef, useCallback, useEffect, useMemo } from "react";
+import React, {
+  useState,
+  useRef,
+  useCallback,
+  useEffect,
+  useMemo,
+} from "react";
 import {
   Table,
   Avatar,
@@ -14,6 +20,7 @@ import {
   message,
   Tooltip,
 } from "antd";
+
 import {
   MoreOutlined,
   PlusOutlined,
@@ -23,62 +30,17 @@ import {
 import dayjs from "dayjs";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import "./table.css";
-import { teams, sides, shifts } from "./teams";
+import "./test.css";
+import { teams, sides, shifts, SHIFT_LIMITS_BY_DAY } from "./teams";
 
 dayjs.extend(isSameOrBefore);
 
+function generateNumberBetween1And16() {
+  const num = Math.floor(Math.random() * 16) + 1;
+  // console.log(num, "Have a nice day");
+  return num;
+}
 // Shift limits configuration based on day of week (0 = Sunday, 1 = Monday, etc.)
-const SHIFT_LIMITS_BY_DAY = {
-  0: { // Sunday
-    morning: 2,
-    evening: 3,
-    night: 5,
-    rest: 999,
-    off: 999,
-  },
-  1: { // Monday
-    morning: 4,
-    evening: 6,
-    night: 8,
-    rest: 999,
-    off: 999,
-  },
-  2: { // Tuesday
-    morning: 4,
-    evening: 6,
-    night: 8,
-    rest: 999,
-    off: 999,
-  },
-  3: { // Wednesday
-    morning: 4,
-    evening: 6,
-    night: 8,
-    rest: 999,
-    off: 999,
-  },
-  4: { // Thursday
-    morning: 4,
-    evening: 6,
-    night: 8,
-    rest: 999,
-    off: 999,
-  },
-  5: { // Friday
-    morning: 5,
-    evening: 8,
-    night: 10,
-    rest: 999,
-    off: 999,
-  },
-  6: { // Saturday
-    morning: 3,
-    evening: 4,
-    night: 6,
-    rest: 999,
-    off: 999,
-  },
-};
 
 const TimetableScheduler = () => {
   // State declarations
@@ -102,16 +64,22 @@ const TimetableScheduler = () => {
   const [isDetailsModalVisible, setIsDetailsModalVisible] = useState(false);
 
   // Function to get shift limit for a specific day
-  const getShiftLimitForDay = useCallback((dateIndex, shiftType) => {
-    const date = dateRange[0].add(dateIndex, 'day');
-    const dayOfWeek = date.day();
-    return SHIFT_LIMITS_BY_DAY[dayOfWeek][shiftType];
-  }, [dateRange]);
+  const getShiftLimitForDay = useCallback(
+    (dateIndex, shiftType) => {
+      const date = dateRange[0].add(dateIndex, "day");
+      const dayOfWeek = date.day();
+      return SHIFT_LIMITS_BY_DAY[dayOfWeek][shiftType];
+    },
+    [dateRange]
+  );
 
   // Function to count shifts for a specific day
   const countShiftsForDay = useCallback((slots, dateIndex, shiftType) => {
     return slots.reduce((count, slot) => {
-      if (slot.dateIndex === dateIndex && slot.shifts.some(s => s.shiftType === shiftType)) {
+      if (
+        slot.dateIndex === dateIndex &&
+        slot.shifts.some((s) => s.shiftType === shiftType)
+      ) {
         return count + 1;
       }
       return count;
@@ -119,40 +87,220 @@ const TimetableScheduler = () => {
   }, []);
 
   // Function to check if shift limit is exceeded and get exceeded shifts
-  const getExceededShifts = useCallback((dateIndex) => {
-    return selectedShifts.filter(shiftType => {
-      const currentCount = countShiftsForDay(timeSlots, dateIndex, shiftType);
-      const limit = getShiftLimitForDay(dateIndex, shiftType);
-      return currentCount >= limit;
-    });
-  }, [selectedShifts, timeSlots, getShiftLimitForDay, countShiftsForDay]);
+  const getExceededShifts = useCallback(
+    (dateIndex) => {
+      return selectedShifts.filter((shiftType) => {
+        const currentCount = countShiftsForDay(timeSlots, dateIndex, shiftType);
+        const limit = getShiftLimitForDay(dateIndex, shiftType);
+        return currentCount >= limit;
+      });
+    },
+    [selectedShifts, timeSlots, getShiftLimitForDay, countShiftsForDay]
+  );
 
   // Function to get shift counts for display
-  const getShiftCounts = useCallback((slots, dateIndex) => {
-    const counts = {
-      morning: { current: 0, limit: getShiftLimitForDay(dateIndex, 'morning') },
-      evening: { current: 0, limit: getShiftLimitForDay(dateIndex, 'evening') },
-      night: { current: 0, limit: getShiftLimitForDay(dateIndex, 'night') },
-      rest: { current: 0, limit: 999 },
-      off: { current: 0, limit: 999 },
+  const getShiftCounts = useCallback(
+    (slots, dateIndex) => {
+      const counts = {
+        morning: {
+          current: 0,
+          limit: getShiftLimitForDay(dateIndex, "morning"),
+        },
+        evening: {
+          current: 0,
+          limit: getShiftLimitForDay(dateIndex, "evening"),
+        },
+        night: { current: 0, limit: getShiftLimitForDay(dateIndex, "night") },
+        rest: { current: 0, limit: 999 },
+        off: { current: 0, limit: 999 },
+      };
+
+      slots.forEach((slot) => {
+        if (slot.dateIndex === dateIndex) {
+          slot.shifts.forEach((shift) => {
+            counts[shift.shiftType].current++;
+          });
+        }
+      });
+
+      return counts;
+    },
+    [getShiftLimitForDay]
+  );
+
+  // Function to generate dates from range
+  const generateDatesFromRange = useCallback((startDate, endDate) => {
+    const dates = [];
+    let currentDate = startDate;
+
+    while (currentDate.isSameOrBefore(endDate, "day")) {
+      dates.push(currentDate.format("ddd, MMM D")); // Format: Mon, Jan 15
+      currentDate = currentDate.add(1, "day");
+    }
+    return dates;
+  }, []);
+
+  // Memoized values
+  const selectedTeam = useMemo(
+    () => teams.find((team) => team.id === selectedTeamId) || teams[0],
+    [selectedTeamId]
+  );
+  const availableTeams = useMemo(
+    () => teams.filter((team) => team.sideId === selectedSideId),
+    [selectedSideId]
+  );
+  const dates = useMemo(
+    () => generateDatesFromRange(dateRange[0], dateRange[1]),
+    [dateRange, generateDatesFromRange]
+  );
+
+  // Update selected team when side changes
+  useEffect(() => {
+    const teamsInSide = teams.filter((team) => team.sideId === selectedSideId);
+    if (
+      teamsInSide.length > 0 &&
+      !teamsInSide.some((team) => team.id === selectedTeamId)
+    ) {
+      setSelectedTeamId(teamsInSide[0].id);
+    }
+  }, [selectedSideId]);
+
+  // Clear time slots when team or dateRange changes
+  useEffect(() => {
+    setTimeSlots([]);
+    clearSelection();
+  }, [selectedTeamId, dateRange]);
+
+  const tableRef = useRef(null);
+
+  console.log("table 1 slots", timeSlots);
+
+  const getTimeSlots = (userId, dateIndex) =>
+    timeSlots.find((s) => s.userId === userId && s.dateIndex === dateIndex);
+
+  const getShiftColor = (shift) => {
+    const colors = {
+      morning: "#4CAF50", // Green
+      evening: "#2196F3", // Blue
+      night: "#9C27B0", // Purple
+      rest: "#FFA726", // Orange
+      off: "#E91E63", // Purple
     };
+    return colors[shift];
+  };
 
-    slots.forEach(slot => {
-      if (slot.dateIndex === dateIndex) {
-        slot.shifts.forEach(shift => {
-          counts[shift.shiftType].current++;
-        });
-      }
+  const isDateUnavailable = (member, dateIndex) => {
+    const currentDate = dateRange[0].add(dateIndex, "day").format("YYYY-MM-DD");
+    return member.unavailableDays.find((day) => day.date === currentDate);
+  };
+
+  const handleMouseDown = (row, col, e) => {
+    const member = selectedTeam.members[row];
+    const unavailableDay = isDateUnavailable(member, col);
+
+    if (unavailableDay) {
+      // Don't allow selection of unavailable days
+      return;
+    }
+
+    // Check if any selected shift would exceed its limit
+    const exceededShifts = getExceededShifts(col);
+    if (exceededShifts.length > 0) {
+      const shiftNames = exceededShifts.map((shift) => {
+        const shiftInfo = shifts.find((s) => s.id === shift) || shifts[0];
+        return shiftInfo.name;
+      });
+      message.warning(
+        `Cannot assign shifts: ${shiftNames.join(
+          ", "
+        )} has reached the daily limit for ${dateRange[0]
+          .add(col, "day")
+          .format("ddd, MMM D")}`
+      );
+      return;
+    }
+
+    e.preventDefault();
+    setIsSelecting(true);
+    setSelectionStart({ row, col });
+    setCurrentSelection({
+      startRow: row,
+      endRow: row,
+      startCol: col,
+      endCol: col,
     });
+    updateSelectedCells(row, row, col, col);
+  };
 
-    return counts;
-  }, [getShiftLimitForDay]);
+  const handleMouseEnter = (row, col) => {
+    if (isSelecting && selectionStart) {
+      // Check if any cell in the selection range is unavailable
+      let hasUnavailableDays = false;
+      let hasExceededShifts = false;
+      let exceededShiftNames = [];
+
+      const startRow = Math.min(selectionStart.row, row);
+      const endRow = Math.max(selectionStart.row, row);
+      const startCol = Math.min(selectionStart.col, col);
+      const endCol = Math.max(selectionStart.col, col);
+
+      // Check for unavailable days and shift limits
+      for (let r = startRow; r <= endRow; r++) {
+        for (let c = startCol; c <= endCol; c++) {
+          if (isDateUnavailable(selectedTeam.members[r], c)) {
+            hasUnavailableDays = true;
+            break;
+          }
+
+          // Check if any selected shift would exceed its limit
+          const exceededShifts = getExceededShifts(c);
+          if (exceededShifts.length > 0) {
+            hasExceededShifts = true;
+            exceededShiftNames = exceededShifts.map(
+              (shift) => (shifts.find((s) => s.id === shift) || shifts[0]).name
+            );
+            break;
+          }
+        }
+        if (hasUnavailableDays || hasExceededShifts) break;
+      }
+
+      if (hasUnavailableDays || hasExceededShifts) {
+        if (hasExceededShifts) {
+          message.warning(
+            `Cannot assign shifts: ${exceededShiftNames.join(
+              ", "
+            )} has reached the daily limit`
+          );
+        }
+        return; // Don't update selection if any validation fails
+      }
+
+      const newSelection = {
+        startRow: Math.min(selectionStart.row, row),
+        endRow: Math.max(selectionStart.row, row),
+        startCol: Math.min(selectionStart.col, col),
+        endCol: Math.max(selectionStart.col, col),
+      };
+      setCurrentSelection(newSelection);
+      updateSelectedCells(
+        newSelection.startRow,
+        newSelection.endRow,
+        newSelection.startCol,
+        newSelection.endCol
+      );
+    }
+  };
 
   const isAnySelectedCellAssigned = () => {
     if (!currentSelection) return false;
-    
+
     for (let r = currentSelection.startRow; r <= currentSelection.endRow; r++) {
-      for (let c = currentSelection.startCol; c <= currentSelection.endCol; c++) {
+      for (
+        let c = currentSelection.startCol;
+        c <= currentSelection.endCol;
+        c++
+      ) {
         const slot = timeSlots.find(
           (s) => s.userId === selectedTeam.members[r].id && s.dateIndex === c
         );
@@ -213,12 +361,7 @@ const TimetableScheduler = () => {
     return () => document.removeEventListener("mouseup", handleMouseUp);
   }, [handleMouseUp]);
 
-  const updateSelectedCells = (
-    startRow,
-    endRow,
-    startCol,
-    endCol
-  ) => {
+  const updateSelectedCells = (startRow, endRow, startCol, endCol) => {
     const newSelected = {};
     for (let r = startRow; r <= endRow; r++) {
       for (let c = startCol; c <= endCol; c++) {
@@ -240,7 +383,7 @@ const TimetableScheduler = () => {
       ) {
         if (r < selectedTeam.members.length && c < dates.length) {
           const shiftData = selectedShifts.map((shiftId) => {
-            const shift = shifts.find((s) => s.id === shiftId);
+            const shift = shifts.find((s) => s.id === shiftId) || shifts[0];
             return {
               shiftType: shift.id,
               startTime: shift.startTime,
@@ -267,10 +410,10 @@ const TimetableScheduler = () => {
         const col = slot.dateIndex;
 
         return !(
-          row >= currentSelection.startRow &&
-          row <= currentSelection.endRow &&
-          col >= currentSelection.startCol &&
-          col <= currentSelection.endCol
+          row >= currentSelection?.startRow &&
+          row <= currentSelection?.endRow &&
+          col >= currentSelection?.startCol &&
+          col <= currentSelection?.endCol
         );
       });
 
@@ -298,10 +441,10 @@ const TimetableScheduler = () => {
         const col = slot.dateIndex;
 
         const isInSelection =
-          row >= currentSelection.startRow &&
-          row <= currentSelection.endRow &&
-          col >= currentSelection.startCol &&
-          col <= currentSelection.endCol;
+          row >= currentSelection?.startRow &&
+          row <= currentSelection?.endRow &&
+          col >= currentSelection?.startCol &&
+          col <= currentSelection?.endCol;
 
         // Keep slots that are NOT in the selection area
         return !isInSelection;
@@ -310,11 +453,7 @@ const TimetableScheduler = () => {
     clearSelection();
   };
 
-  const handleRemoveShift = (
-    userId,
-    dateIndex,
-    shiftToRemove
-  ) => {
+  const handleRemoveShift = (userId, dateIndex, shiftToRemove) => {
     setTimeSlots(
       (prev) =>
         prev
@@ -331,9 +470,224 @@ const TimetableScheduler = () => {
             }
             return slot;
           })
-          .filter((slot) => slot !== null) // Remove null slots
+          .filter((slot) => slot !== null) // Remove null slots and maintain type safety
     );
-  }; 
+  };
+
+  const columns = [
+    {
+      title: "Staff",
+      dataIndex: "staff",
+      key: "staff",
+      fixed: "left",
+      width: 200,
+      render: (user) => (
+        <div style={{ padding: "8px", display: "flex", alignItems: "center" }}>
+          {/* <Avatar src={user.avatar} /> */}
+          <div className="sprite-wrapper">
+            <div
+              className={`sprite icon-${generateNumberBetween1And16()}`}
+              style={{
+                width: "120px",
+                height: "120px",
+              }}
+            ></div>
+          </div>
+
+          <div
+            style={{
+              flex: 1,
+            }}
+          >
+            <Typography.Text strong>{user.name}</Typography.Text>
+            <br />
+            <Typography.Text type="secondary">{user.role}</Typography.Text>
+          </div>
+        </div>
+      ),
+    },
+    ...dates.map((date, index) => {
+      const shiftCounts = getShiftCounts(timeSlots, index);
+      return {
+        title: (
+          <div>
+            <div>{date}</div>
+            <div style={{ fontSize: "11px", marginTop: "4px" }}>
+              {Object.entries(shiftCounts)
+                .filter(([shiftType]) => !["rest", "off"].includes(shiftType))
+                .map(([shiftType, counts]) => (
+                  <div
+                    key={shiftType}
+                    style={{
+                      color:
+                        counts.current >= counts.limit ? "#ff4d4f" : "inherit",
+                      fontWeight:
+                        counts.current >= counts.limit ? "bold" : "normal",
+                    }}
+                  >
+                    {shiftType.charAt(0).toUpperCase()}: {counts.current}/
+                    {counts.limit}
+                  </div>
+                ))}
+            </div>
+          </div>
+        ),
+        dataIndex: index.toString(),
+        key: index.toString(),
+        width: 150,
+        render: (_, record, rowIndex) => {
+          const slot = getTimeSlots(selectedTeam.members[rowIndex].id, index);
+          const isSelected = selectedCells[`${rowIndex}-${index}`];
+          const unavailableDay = isDateUnavailable(
+            selectedTeam.members[rowIndex],
+            index
+          );
+
+          return (
+            <div
+              onMouseDown={(e) => handleMouseDown(rowIndex, index, e)}
+              onMouseEnter={() => handleMouseEnter(rowIndex, index)}
+              style={{
+                height: 80,
+                background: unavailableDay
+                  ? unavailableDay.status === "confirmed"
+                    ? "rgba(255, 77, 79, 0.15)" // Light red for confirmed
+                    : "rgba(250, 173, 20, 0.15)" // Light orange for pending
+                  : isSelected
+                  ? "#E6F4FF"
+                  : "white",
+                cursor: unavailableDay ? "not-allowed" : "pointer",
+                padding: 0,
+                border: "1px solid #f0f0f0",
+                borderTop: "none",
+                borderLeft: "none",
+                position: "relative",
+                overflow: "hidden",
+              }}
+            >
+              {unavailableDay && (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    height: "100%",
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    padding: "4px",
+                    color:
+                      unavailableDay.status === "confirmed"
+                        ? "#ff4d4f"
+                        : "#faad14",
+                    fontSize: "12px",
+                    textAlign: "center",
+                    backgroundColor: "rgba(255, 255, 255, 0.8)",
+                    zIndex: 1,
+                  }}
+                >
+                  <div style={{ fontWeight: "bold" }}>
+                    {unavailableDay.status === "confirmed"
+                      ? "Unavailable"
+                      : "Pending"}
+                  </div>
+                  {unavailableDay.reason && (
+                    <div style={{ fontSize: "11px", marginTop: "2px" }}>
+                      {unavailableDay.reason}
+                    </div>
+                  )}
+                </div>
+              )}
+              {slot?.shifts.map((shiftData, idx) => {
+                const totalShifts = slot.shifts.length;
+                const shiftInfo = shifts.find(
+                  (s) => s.id === shiftData.shiftType
+                );
+                const showTimeWithLabel = totalShifts === 3;
+
+                return (
+                  <div
+                    key={`${shiftData.shiftType}-${idx}`}
+                    style={{
+                      position: "absolute",
+                      top: `${(idx * 100) / totalShifts}%`,
+                      left: 0,
+                      width: "100%",
+                      height: `${100 / totalShifts}%`,
+                      background: getShiftColor(shiftData.shiftType),
+                      padding: 4,
+                      color: "white",
+                      borderBottom:
+                        idx < totalShifts - 1
+                          ? "1px solid rgba(255,255,255,0.2)"
+                          : "none",
+                      ...(isSelected && {
+                        opacity: 0.6,
+                      }),
+                    }}
+                    className="time-slot"
+                  >
+                    <CloseOutlined
+                      className="remove-slot"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleRemoveShift(
+                          selectedTeam.members[rowIndex].id,
+                          index,
+                          shiftData.shiftType
+                        );
+                      }}
+                      style={{
+                        position: "absolute",
+                        top: 4,
+                        right: 4,
+                        fontSize: 12,
+                        opacity: 0,
+                        transition: "opacity 0.2s",
+                        backgroundColor: "rgba(255, 255, 255, 0.2)",
+                        padding: 4,
+                        borderRadius: "50%",
+                        cursor: "pointer",
+                        zIndex: 2,
+                      }}
+                    />
+                    <div
+                      style={{
+                        fontSize: "12px",
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        textShadow: "0 0 2px rgba(0,0,0,0.5)",
+                        lineHeight: showTimeWithLabel ? "26px" : "1.2",
+                      }}
+                    >
+                      {showTimeWithLabel ? (
+                        `${shiftInfo?.name} (${shiftData.startTime} - ${shiftData.endTime})`
+                      ) : (
+                        <>
+                          <div>{shiftInfo?.name}</div>
+                          <div
+                            style={{
+                              opacity: 0.8,
+                              fontSize: "11px",
+                            }}
+                          >
+                            {shiftData.startTime} - {shiftData.endTime}
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          );
+        },
+      };
+    }),
+  ];
 
   const data = selectedTeam.members.map((member) => ({
     key: member.id,
@@ -365,10 +719,10 @@ const TimetableScheduler = () => {
 
   const getScheduleTypeTag = (shift) => {
     const colors = {
-      morning: "#4CAF50",
-      evening: "#2196F3",
-      night: "#9C27B0",
-      rest: "#FFA726",
+      morning: "#4CAF50", // Green
+      evening: "#2196F3", // Blue
+      night: "#9C27B0", // Purple
+      rest: "#FFA726", // Orange
       off: "#E91E63",
     };
     return <Tag color={colors[shift]}>{shift.toUpperCase()}</Tag>;
@@ -384,16 +738,23 @@ const TimetableScheduler = () => {
     // Check if rest or off day is being selected
     const hasRest = newShifts.includes("rest");
     const hasOff = newShifts.includes("off");
-    const hasOtherShifts = newShifts.some(shift => !["rest", "off"].includes(shift));
+    const hasOtherShifts = newShifts.some(
+      (shift) => !["rest", "off"].includes(shift)
+    );
 
     // If rest or off day is selected, don't allow other shifts
     if ((hasRest || hasOff) && hasOtherShifts) {
       // If rest/off is being added, only keep rest/off
-      if (newShifts[newShifts.length - 1] === "rest" || newShifts[newShifts.length - 1] === "off") {
+      if (
+        newShifts[newShifts.length - 1] === "rest" ||
+        newShifts[newShifts.length - 1] === "off"
+      ) {
         setSelectedShifts([newShifts[newShifts.length - 1]]);
       } else {
         // If other shift is being added, filter out rest/off
-        setSelectedShifts(newShifts.filter(shift => !["rest", "off"].includes(shift)));
+        setSelectedShifts(
+          newShifts.filter((shift) => !["rest", "off"].includes(shift))
+        );
       }
       return;
     }
@@ -429,9 +790,13 @@ const TimetableScheduler = () => {
           </Space>
         </div>
 
-        <div style={{ margin: "30px" }}>
+        <div
+          style={{
+            margin: "30px",
+          }}
+        >
           <Space size="large" direction="vertical">
-            <Space size="large">
+            <Space size={"large"}>
               <Space>
                 <Typography.Text>Site:</Typography.Text>
                 <Select
@@ -465,13 +830,13 @@ const TimetableScheduler = () => {
                 Clear All Schedules
               </Button>
             </Space>
-            <Space size="large">
+            <Space size={"large"}>
               <Space>
                 <Typography.Text>Date Range:</Typography.Text>
                 <DatePicker.RangePicker
                   value={dateRange}
                   onChange={(dates) => {
-                    if (dates) {
+                    if (dates && dates[0] && dates[1]) {
                       setDateRange([dates[0], dates[1]]);
                     }
                   }}
@@ -490,7 +855,7 @@ const TimetableScheduler = () => {
                     label: `${shift.name} (${shift.startTime}-${shift.endTime})`,
                     disabled:
                       selectedShifts.length === 1 &&
-                      selectedShifts[0] === shift.id,
+                      selectedShifts[0] === shift.id, // Disable the last selected option
                   }))}
                   placeholder="Select shifts"
                 />
@@ -502,29 +867,32 @@ const TimetableScheduler = () => {
         <div ref={tableRef} style={{ position: "relative" }}>
           <Table
             columns={columns.map((col, index) => {
-              if (index === 0) return col;
-              
+              if (index === 0) return col; // Skip Staff column
+
+              // Add tooltip to date columns showing shift limits
               const dateIndex = index - 1;
-              const date = dateRange[0].add(dateIndex, 'day');
+              const date = dateRange[0].add(dateIndex, "day");
               const dayOfWeek = date.day();
               const limits = SHIFT_LIMITS_BY_DAY[dayOfWeek];
-              
+
               return {
                 ...col,
                 title: (
-                  <Tooltip title={
-                    <div>
-                      <div>Shift Limits:</div>
-                      {Object.entries(limits)
-                        .filter(([type]) => !['rest', 'off'].includes(type))
-                        .map(([type, limit]) => (
-                          <div key={type}>
-                            {type.charAt(0).toUpperCase() + type.slice(1)}: {limit}
-                          </div>
-                        ))
-                      }
-                    </div>
-                  }>
+                  <Tooltip
+                    title={
+                      <div>
+                        <div>Shift Limits:</div>
+                        {Object.entries(limits)
+                          .filter(([type]) => !["rest", "off"].includes(type))
+                          .map(([type, limit]) => (
+                            <div key={type}>
+                              {type.charAt(0).toUpperCase() + type.slice(1)}:{" "}
+                              {limit}
+                            </div>
+                          ))}
+                      </div>
+                    }
+                  >
                     {col.title}
                   </Tooltip>
                 ),
@@ -635,6 +1003,9 @@ const TimetableScheduler = () => {
                         <Space>
                           <span>{schedule.date}</span>
                           {getScheduleTypeTag(schedule.shift)}
+                          {/* <span>
+                            {schedule.startTime} – {schedule.endTime}
+                          </span> */}
                         </Space>
                       </List.Item>
                     )}
@@ -649,4 +1020,4 @@ const TimetableScheduler = () => {
   );
 };
 
-export default TimetableScheduler; 
+export default TimetableScheduler;

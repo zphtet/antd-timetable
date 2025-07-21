@@ -1,4 +1,10 @@
-import React, { useState, useRef, useCallback, useEffect, useMemo } from "react";
+import React, {
+  useState,
+  useRef,
+  useCallback,
+  useEffect,
+  useMemo,
+} from "react";
 import {
   Table,
   Avatar,
@@ -25,6 +31,7 @@ import dayjs from "dayjs";
 import type { Dayjs } from "dayjs";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import "./table.css";
+import "../jsxversion/test.css";
 import { teams, sides, shifts } from "../data/teams";
 import type { TeamMember, ShiftType } from "../data/teams";
 
@@ -56,52 +63,63 @@ interface ScheduleDetail {
     endTime: string;
   }[];
 }
-
+function generateNumberBetween1And16() {
+  const num = Math.floor(Math.random() * 16) + 1;
+  // console.log(num, "Have a nice day");
+  return num;
+}
 // Shift limits configuration based on day of week (0 = Sunday, 1 = Monday, etc.)
 const SHIFT_LIMITS_BY_DAY: Record<number, Record<ShiftType, number>> = {
-  0: { // Sunday
+  0: {
+    // Sunday
     morning: 2,
     evening: 3,
     night: 5,
     rest: 999,
     off: 999,
   },
-  1: { // Monday
+  1: {
+    // Monday
     morning: 4,
     evening: 6,
     night: 8,
     rest: 999,
     off: 999,
   },
-  2: { // Tuesday
+  2: {
+    // Tuesday
     morning: 4,
     evening: 6,
     night: 8,
     rest: 999,
     off: 999,
   },
-  3: { // Wednesday
+  3: {
+    // Wednesday
     morning: 4,
     evening: 6,
     night: 8,
     rest: 999,
     off: 999,
   },
-  4: { // Thursday
+  4: {
+    // Thursday
     morning: 4,
     evening: 6,
     night: 8,
     rest: 999,
     off: 999,
   },
-  5: { // Friday
+  5: {
+    // Friday
     morning: 5,
     evening: 8,
     night: 10,
     rest: 999,
     off: 999,
   },
-  6: { // Saturday
+  6: {
+    // Saturday
     morning: 3,
     evening: 4,
     night: 6,
@@ -143,68 +161,104 @@ const TimetableScheduler: React.FC = () => {
   const [isDetailsModalVisible, setIsDetailsModalVisible] = useState(false);
 
   // Function to get shift limit for a specific day
-  const getShiftLimitForDay = useCallback((dateIndex: number, shiftType: ShiftType): number => {
-    const date = dateRange[0].add(dateIndex, 'day');
-    const dayOfWeek = date.day();
-    return SHIFT_LIMITS_BY_DAY[dayOfWeek][shiftType];
-  }, [dateRange]);
+  const getShiftLimitForDay = useCallback(
+    (dateIndex: number, shiftType: ShiftType): number => {
+      const date = dateRange[0].add(dateIndex, "day");
+      const dayOfWeek = date.day();
+      return SHIFT_LIMITS_BY_DAY[dayOfWeek][shiftType];
+    },
+    [dateRange]
+  );
 
   // Function to count shifts for a specific day
-  const countShiftsForDay = useCallback((slots: TimeSlot[], dateIndex: number, shiftType: ShiftType): number => {
-    return slots.reduce((count, slot) => {
-      if (slot.dateIndex === dateIndex && slot.shifts.some(s => s.shiftType === shiftType)) {
-        return count + 1;
-      }
-      return count;
-    }, 0);
-  }, []);
+  const countShiftsForDay = useCallback(
+    (slots: TimeSlot[], dateIndex: number, shiftType: ShiftType): number => {
+      return slots.reduce((count, slot) => {
+        if (
+          slot.dateIndex === dateIndex &&
+          slot.shifts.some((s) => s.shiftType === shiftType)
+        ) {
+          return count + 1;
+        }
+        return count;
+      }, 0);
+    },
+    []
+  );
 
   // Function to check if shift limit is exceeded and get exceeded shifts
-  const getExceededShifts = useCallback((dateIndex: number): ShiftType[] => {
-    return selectedShifts.filter(shiftType => {
-      const currentCount = countShiftsForDay(timeSlots, dateIndex, shiftType);
-      const limit = getShiftLimitForDay(dateIndex, shiftType);
-      return currentCount >= limit;
-    });
-  }, [selectedShifts, timeSlots, getShiftLimitForDay, countShiftsForDay]);
+  const getExceededShifts = useCallback(
+    (dateIndex: number): ShiftType[] => {
+      return selectedShifts.filter((shiftType) => {
+        const currentCount = countShiftsForDay(timeSlots, dateIndex, shiftType);
+        const limit = getShiftLimitForDay(dateIndex, shiftType);
+        return currentCount >= limit;
+      });
+    },
+    [selectedShifts, timeSlots, getShiftLimitForDay, countShiftsForDay]
+  );
 
   // Function to get shift counts for display
-  const getShiftCounts = useCallback((slots: TimeSlot[], dateIndex: number): Record<ShiftType, { current: number; limit: number }> => {
-    const counts: Record<ShiftType, { current: number; limit: number }> = {
-      morning: { current: 0, limit: getShiftLimitForDay(dateIndex, 'morning') },
-      evening: { current: 0, limit: getShiftLimitForDay(dateIndex, 'evening') },
-      night: { current: 0, limit: getShiftLimitForDay(dateIndex, 'night') },
-      rest: { current: 0, limit: 999 },
-      off: { current: 0, limit: 999 },
-    };
+  const getShiftCounts = useCallback(
+    (
+      slots: TimeSlot[],
+      dateIndex: number
+    ): Record<ShiftType, { current: number; limit: number }> => {
+      const counts: Record<ShiftType, { current: number; limit: number }> = {
+        morning: {
+          current: 0,
+          limit: getShiftLimitForDay(dateIndex, "morning"),
+        },
+        evening: {
+          current: 0,
+          limit: getShiftLimitForDay(dateIndex, "evening"),
+        },
+        night: { current: 0, limit: getShiftLimitForDay(dateIndex, "night") },
+        rest: { current: 0, limit: 999 },
+        off: { current: 0, limit: 999 },
+      };
 
-    slots.forEach(slot => {
-      if (slot.dateIndex === dateIndex) {
-        slot.shifts.forEach(shift => {
-          counts[shift.shiftType].current++;
-        });
-      }
-    });
+      slots.forEach((slot) => {
+        if (slot.dateIndex === dateIndex) {
+          slot.shifts.forEach((shift) => {
+            counts[shift.shiftType].current++;
+          });
+        }
+      });
 
-    return counts;
-  }, [getShiftLimitForDay]);
+      return counts;
+    },
+    [getShiftLimitForDay]
+  );
 
   // Function to generate dates from range
-  const generateDatesFromRange = useCallback((startDate: Dayjs, endDate: Dayjs): string[] => {
-    const dates: string[] = [];
-    let currentDate = startDate;
+  const generateDatesFromRange = useCallback(
+    (startDate: Dayjs, endDate: Dayjs): string[] => {
+      const dates: string[] = [];
+      let currentDate = startDate;
 
-    while (currentDate.isSameOrBefore(endDate, "day")) {
-      dates.push(currentDate.format("ddd, MMM D")); // Format: Mon, Jan 15
-      currentDate = currentDate.add(1, "day");
-    }
-    return dates;
-  }, []);
+      while (currentDate.isSameOrBefore(endDate, "day")) {
+        dates.push(currentDate.format("ddd, MMM D")); // Format: Mon, Jan 15
+        currentDate = currentDate.add(1, "day");
+      }
+      return dates;
+    },
+    []
+  );
 
   // Memoized values
-  const selectedTeam = useMemo(() => teams.find((team) => team.id === selectedTeamId)!, [selectedTeamId]);
-  const availableTeams = useMemo(() => teams.filter((team) => team.sideId === selectedSideId), [selectedSideId]);
-  const dates = useMemo(() => generateDatesFromRange(dateRange[0], dateRange[1]), [dateRange, generateDatesFromRange]);
+  const selectedTeam = useMemo(
+    () => teams.find((team) => team.id === selectedTeamId)!,
+    [selectedTeamId]
+  );
+  const availableTeams = useMemo(
+    () => teams.filter((team) => team.sideId === selectedSideId),
+    [selectedSideId]
+  );
+  const dates = useMemo(
+    () => generateDatesFromRange(dateRange[0], dateRange[1]),
+    [dateRange, generateDatesFromRange]
+  );
 
   // Update selected team when side changes
   useEffect(() => {
@@ -258,11 +312,17 @@ const TimetableScheduler: React.FC = () => {
     // Check if any selected shift would exceed its limit
     const exceededShifts = getExceededShifts(col);
     if (exceededShifts.length > 0) {
-      const shiftNames = exceededShifts.map(shift => {
-        const shiftInfo = shifts.find(s => s.id === shift)!;
+      const shiftNames = exceededShifts.map((shift) => {
+        const shiftInfo = shifts.find((s) => s.id === shift)!;
         return shiftInfo.name;
       });
-      message.warning(`Cannot assign shifts: ${shiftNames.join(', ')} has reached the daily limit for ${dateRange[0].add(col, 'day').format('ddd, MMM D')}`);
+      message.warning(
+        `Cannot assign shifts: ${shiftNames.join(
+          ", "
+        )} has reached the daily limit for ${dateRange[0]
+          .add(col, "day")
+          .format("ddd, MMM D")}`
+      );
       return;
     }
 
@@ -284,7 +344,7 @@ const TimetableScheduler: React.FC = () => {
       let hasUnavailableDays = false;
       let hasExceededShifts = false;
       let exceededShiftNames: string[] = [];
-      
+
       const startRow = Math.min(selectionStart.row, row);
       const endRow = Math.max(selectionStart.row, row);
       const startCol = Math.min(selectionStart.col, col);
@@ -302,8 +362,8 @@ const TimetableScheduler: React.FC = () => {
           const exceededShifts = getExceededShifts(c);
           if (exceededShifts.length > 0) {
             hasExceededShifts = true;
-            exceededShiftNames = exceededShifts.map(shift => 
-              shifts.find(s => s.id === shift)!.name
+            exceededShiftNames = exceededShifts.map(
+              (shift) => shifts.find((s) => s.id === shift)!.name
             );
             break;
           }
@@ -313,7 +373,11 @@ const TimetableScheduler: React.FC = () => {
 
       if (hasUnavailableDays || hasExceededShifts) {
         if (hasExceededShifts) {
-          message.warning(`Cannot assign shifts: ${exceededShiftNames.join(', ')} has reached the daily limit`);
+          message.warning(
+            `Cannot assign shifts: ${exceededShiftNames.join(
+              ", "
+            )} has reached the daily limit`
+          );
         }
         return; // Don't update selection if any validation fails
       }
@@ -336,9 +400,13 @@ const TimetableScheduler: React.FC = () => {
 
   const isAnySelectedCellAssigned = () => {
     if (!currentSelection) return false;
-    
+
     for (let r = currentSelection.startRow; r <= currentSelection.endRow; r++) {
-      for (let c = currentSelection.startCol; c <= currentSelection.endCol; c++) {
+      for (
+        let c = currentSelection.startCol;
+        c <= currentSelection.endCol;
+        c++
+      ) {
         const slot = timeSlots.find(
           (s) => s.userId === selectedTeam.members[r].id && s.dateIndex === c
         );
@@ -529,14 +597,28 @@ const TimetableScheduler: React.FC = () => {
       fixed: "left" as const,
       width: 200,
       render: (user: TeamMember) => (
-        <Space style={{ padding: "8px" }}>
-          <Avatar src={user.avatar} />
-          <div>
+        <div style={{ padding: "8px", display: "flex", alignItems: "center" }}>
+          {/* <Avatar src={user.avatar} /> */}
+          <div className="sprite-wrapper">
+            <div
+              className={`sprite icon-${generateNumberBetween1And16()}`}
+              style={{
+                width: "120px",
+                height: "120px",
+              }}
+            ></div>
+          </div>
+
+          <div
+            style={{
+              flex: 1,
+            }}
+          >
             <Typography.Text strong>{user.name}</Typography.Text>
             <br />
             <Typography.Text type="secondary">{user.role}</Typography.Text>
           </div>
-        </Space>
+        </div>
       ),
     },
     ...dates.map((date, index) => {
@@ -545,15 +627,21 @@ const TimetableScheduler: React.FC = () => {
         title: (
           <div>
             <div>{date}</div>
-            <div style={{ fontSize: '11px', marginTop: '4px' }}>
+            <div style={{ fontSize: "11px", marginTop: "4px" }}>
               {Object.entries(shiftCounts)
-                .filter(([shiftType]) => !['rest', 'off'].includes(shiftType))
+                .filter(([shiftType]) => !["rest", "off"].includes(shiftType))
                 .map(([shiftType, counts]) => (
-                  <div key={shiftType} style={{ 
-                    color: counts.current >= counts.limit ? '#ff4d4f' : 'inherit',
-                    fontWeight: counts.current >= counts.limit ? 'bold' : 'normal'
-                  }}>
-                    {shiftType.charAt(0).toUpperCase()}: {counts.current}/{counts.limit}
+                  <div
+                    key={shiftType}
+                    style={{
+                      color:
+                        counts.current >= counts.limit ? "#ff4d4f" : "inherit",
+                      fontWeight:
+                        counts.current >= counts.limit ? "bold" : "normal",
+                    }}
+                  >
+                    {shiftType.charAt(0).toUpperCase()}: {counts.current}/
+                    {counts.limit}
                   </div>
                 ))}
             </div>
@@ -769,16 +857,23 @@ const TimetableScheduler: React.FC = () => {
     // Check if rest or off day is being selected
     const hasRest = newShifts.includes("rest");
     const hasOff = newShifts.includes("off");
-    const hasOtherShifts = newShifts.some(shift => !["rest", "off"].includes(shift));
+    const hasOtherShifts = newShifts.some(
+      (shift) => !["rest", "off"].includes(shift)
+    );
 
     // If rest or off day is selected, don't allow other shifts
     if ((hasRest || hasOff) && hasOtherShifts) {
       // If rest/off is being added, only keep rest/off
-      if (newShifts[newShifts.length - 1] === "rest" || newShifts[newShifts.length - 1] === "off") {
+      if (
+        newShifts[newShifts.length - 1] === "rest" ||
+        newShifts[newShifts.length - 1] === "off"
+      ) {
         setSelectedShifts([newShifts[newShifts.length - 1]]);
       } else {
         // If other shift is being added, filter out rest/off
-        setSelectedShifts(newShifts.filter(shift => !["rest", "off"].includes(shift)));
+        setSelectedShifts(
+          newShifts.filter((shift) => !["rest", "off"].includes(shift))
+        );
       }
       return;
     }
@@ -892,29 +987,31 @@ const TimetableScheduler: React.FC = () => {
           <Table
             columns={columns.map((col, index) => {
               if (index === 0) return col; // Skip Staff column
-              
+
               // Add tooltip to date columns showing shift limits
               const dateIndex = index - 1;
-              const date = dateRange[0].add(dateIndex, 'day');
+              const date = dateRange[0].add(dateIndex, "day");
               const dayOfWeek = date.day();
               const limits = SHIFT_LIMITS_BY_DAY[dayOfWeek];
-              
+
               return {
                 ...col,
                 title: (
-                  <Tooltip title={
-                    <div>
-                      <div>Shift Limits:</div>
-                      {Object.entries(limits)
-                        .filter(([type]) => !['rest', 'off'].includes(type))
-                        .map(([type, limit]) => (
-                          <div key={type}>
-                            {type.charAt(0).toUpperCase() + type.slice(1)}: {limit}
-                          </div>
-                        ))
-                      }
-                    </div>
-                  }>
+                  <Tooltip
+                    title={
+                      <div>
+                        <div>Shift Limits:</div>
+                        {Object.entries(limits)
+                          .filter(([type]) => !["rest", "off"].includes(type))
+                          .map(([type, limit]) => (
+                            <div key={type}>
+                              {type.charAt(0).toUpperCase() + type.slice(1)}:{" "}
+                              {limit}
+                            </div>
+                          ))}
+                      </div>
+                    }
+                  >
                     {col.title}
                   </Tooltip>
                 ),
