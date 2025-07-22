@@ -30,17 +30,9 @@ import {
 import dayjs from "dayjs";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import "./table.css";
-import "./test.css";
 import { teams, sides, shifts, SHIFT_LIMITS_BY_DAY } from "./teams";
 
 dayjs.extend(isSameOrBefore);
-
-function generateNumberBetween1And16() {
-  const num = Math.floor(Math.random() * 16) + 1;
-  // console.log(num, "Have a nice day");
-  return num;
-}
-// Shift limits configuration based on day of week (0 = Sunday, 1 = Monday, etc.)
 
 const TimetableScheduler = () => {
   // State declarations
@@ -486,7 +478,7 @@ const TimetableScheduler = () => {
           {/* <Avatar src={user.avatar} /> */}
           <div className="sprite-wrapper">
             <div
-              className={`sprite icon-${generateNumberBetween1And16()}`}
+              className={`sprite icon-${user.avatar}`}
               style={{
                 width: "120px",
                 height: "120px",
@@ -501,7 +493,14 @@ const TimetableScheduler = () => {
           >
             <Typography.Text strong>{user.name}</Typography.Text>
             <br />
-            <Typography.Text type="secondary">{user.role}</Typography.Text>
+            <Typography.Text
+              style={{
+                fontSize: "12px",
+              }}
+              type="secondary"
+            >
+              {user.role}
+            </Typography.Text>
           </div>
         </div>
       ),
@@ -780,13 +779,13 @@ const TimetableScheduler = () => {
                 Drag to select cells, then choose an action.
               </Typography.Text>
             </div>
-            <Button
+            {/* <Button
               type="primary"
               icon={<EyeOutlined />}
               onClick={() => setIsDetailsModalVisible(true)}
             >
               View Details
-            </Button>
+            </Button> */}
           </Space>
         </div>
 
@@ -955,7 +954,7 @@ const TimetableScheduler = () => {
                   border: "1px solid #ff4d4f",
                 }}
               />
-              <span>Unavailable (Confirmed)</span>
+              <span>Annual Leave (Confirmed)</span>
             </Space>
             <Space>
               <div
@@ -967,7 +966,7 @@ const TimetableScheduler = () => {
                   border: "1px solid #faad14",
                 }}
               />
-              <span>Unavailable (Pending)</span>
+              <span>Annual Leave (Pending)</span>
             </Space>
           </Space>
         </div>

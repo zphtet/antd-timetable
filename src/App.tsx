@@ -9,7 +9,7 @@
 // @ts-expect-error - This is a JSX file
 import JSXTable from "./jsxversion/table.jsx";
 // import { Watermark } from "antd";
-import TestComponent from "./jsxversion/test-com";
+// import TestComponent from "./jsxversion/test-com";
 // import AntDTable2 from "./components/table2";
 // import AntDTable2 from "./components/table2";
 const App = () => {
@@ -28,7 +28,7 @@ const App = () => {
       </div>
 
       <div>
-        <TestComponent />
+        {/* <TestComponent /> */}
       </div>
 
       {/* <Watermark content={"Ant Design is Great"}>

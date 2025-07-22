@@ -44,4 +44,81 @@
 .ant-modal-content .ant-tag {
   min-width: 60px;
   text-align: center;
-} 
+}
+
+/* Wrapper that keeps final size 60x60 */
+.sprite-wrapper {
+  width: 60px;
+  height: 60px;
+  overflow: hidden;
+  display: inline-block;
+  /* outline: 1px solid red; */
+}
+
+/* Sprite scaled down from 120x120 to 60x60 */
+.sprite {
+  background-image: url("/assets/profiles.jpg"); /* adjust path if needed */
+  background-repeat: no-repeat;
+  display: inline-block;
+  width: 120px; /* original sprite cell size */
+  height: 120px;
+  transform: scale(0.5);
+  transform-origin: top left;
+  outline: 1px solid red;
+}
+
+/* Row 1 */
+.icon-1 {
+  background-position: -10px 0px;
+}
+.icon-2 {
+  background-position: -130px 0px;
+}
+.icon-3 {
+  background-position: -240px 0px;
+}
+.icon-4 {
+  background-position: -360px 0px;
+}
+
+/* Row 2 */
+.icon-5 {
+  background-position: -10px -110px;
+}
+.icon-6 {
+  background-position: -130px -110px;
+}
+.icon-7 {
+  background-position: -245px -110px;
+}
+.icon-8 {
+  background-position: -350px -110px;
+}
+
+/* Row 3 */
+.icon-9 {
+  background-position: -10px -220px;
+}
+.icon-10 {
+  background-position: -130px -220px;
+}
+.icon-11 {
+  background-position: -245px -220px;
+}
+.icon-12 {
+  background-position: -360px -220px;
+}
+
+/* Row 4 */
+.icon-13 {
+  background-position: -10px -325px;
+}
+.icon-14 {
+  background-position: -130px -325px;
+}
+.icon-15 {
+  background-position: -245px -325px;
+}
+.icon-16 {
+  background-position: -350px -325px;
+}
