@@ -34,6 +34,7 @@ import "./table.css";
 import "../jsxversion/test.css";
 import { teams, sides, shifts } from "../data/teams";
 import type { TeamMember, ShiftType } from "../data/teams";
+import { generateNumberBetween1And16 } from "./generateNumberBetween1And16";
 
 dayjs.extend(isSameOrBefore);
 
@@ -62,11 +63,6 @@ interface ScheduleDetail {
     startTime: string;
     endTime: string;
   }[];
-}
-function generateNumberBetween1And16() {
-  const num = Math.floor(Math.random() * 16) + 1;
-  // console.log(num, "Have a nice day");
-  return num;
 }
 // Shift limits configuration based on day of week (0 = Sunday, 1 = Monday, etc.)
 const SHIFT_LIMITS_BY_DAY: Record<number, Record<ShiftType, number>> = {

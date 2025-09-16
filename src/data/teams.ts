@@ -1,3 +1,5 @@
+import type { User } from "../components/table2";
+
 export interface TeamMember {
   id: string;
   name: string;
@@ -443,3 +445,15 @@ export const teams: Team[] = [
     ],
   },
 ];
+export const generateDummyUsers = (count: number) => {
+  const users: User[] = [];
+  for (let i = 0; i < count; i++) {
+    users.push({
+      id: `user-${i + 1}`,
+      name: `Staff Member ${i + 1}`,
+      avatar: `/placeholder.svg?height=40&width=40`,
+      role: i % 3 === 0 ? "Manager" : i % 3 === 1 ? "Developer" : "Designer",
+    });
+  }
+  return users;
+};

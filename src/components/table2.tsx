@@ -17,7 +17,8 @@ import { CloseOutlined, EyeOutlined, MoreOutlined } from "@ant-design/icons";
 import { useState, useRef, useCallback, useEffect } from "react";
 import type { MenuProps } from "antd";
 import dayjs, { Dayjs } from "dayjs";
-type User = {
+import { generateDummyUsers } from "../data/teams";
+export type User = {
   id: string;
   name: string;
   avatar?: string;
@@ -37,19 +38,6 @@ type SelectionArea = {
   endRow: number;
   startCol: number;
   endCol: number;
-};
-
-const generateDummyUsers = (count: number) => {
-  const users: User[] = [];
-  for (let i = 0; i < count; i++) {
-    users.push({
-      id: `user-${i + 1}`,
-      name: `Staff Member ${i + 1}`,
-      avatar: `/placeholder.svg?height=40&width=40`,
-      role: i % 3 === 0 ? "Manager" : i % 3 === 1 ? "Developer" : "Designer",
-    });
-  }
-  return users;
 };
 
 const generateDummyDates = (count: number) => {

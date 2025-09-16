@@ -7,11 +7,12 @@
 // import TimetableScheduler from "./components/table";
 
 // @ts-expect-error - This is a JSX file
-import JSXTable from "./jsxversion/table.jsx";
+// import JSXTable from "./jsxversion/table.jsx";
 // import { Watermark } from "antd";
 // import TestComponent from "./jsxversion/test-com";
 // import AntDTable2 from "./components/table2";
 // import AntDTable2 from "./components/table2";
+import AntdCards from "./components/antd-cards";
 const App = () => {
   return (
     <div>
@@ -22,10 +23,11 @@ const App = () => {
         <AntTable />
       </div> */}
 
-      <div className="timetable-container">
+      {/* <div className="timetable-container">
         <p>JSX Version</p>
         <JSXTable />
-      </div>
+      </div> */}
+      <AntdCards />
 
       <div>
         {/* <TestComponent /> */}

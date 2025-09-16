@@ -55,7 +55,7 @@ const TimetableScheduler = () => {
   const [dropdownPosition, setDropdownPosition] = useState({ x: 0, y: 0 });
   const [isDetailsModalVisible, setIsDetailsModalVisible] = useState(false);
 
-  // Function to get shift limit for a specific day
+  // FUNCTION to get shift limit for a specific day
   const getShiftLimitForDay = useCallback(
     (dateIndex, shiftType) => {
       const date = dateRange[0].add(dateIndex, "day");
@@ -65,7 +65,7 @@ const TimetableScheduler = () => {
     [dateRange]
   );
 
-  // Function to count shifts for a specific day
+  // FUNCTION to count shifts for a specific day
   const countShiftsForDay = useCallback((slots, dateIndex, shiftType) => {
     return slots.reduce((count, slot) => {
       if (
@@ -78,7 +78,7 @@ const TimetableScheduler = () => {
     }, 0);
   }, []);
 
-  // Function to check if shift limit is exceeded and get exceeded shifts
+  // FUNCTION to check if shift limit is exceeded and get exceeded shifts
   const getExceededShifts = useCallback(
     (dateIndex) => {
       return selectedShifts.filter((shiftType) => {
@@ -90,7 +90,7 @@ const TimetableScheduler = () => {
     [selectedShifts, timeSlots, getShiftLimitForDay, countShiftsForDay]
   );
 
-  // Function to get shift counts for display
+  // FUNCTION to get shift counts for display
   const getShiftCounts = useCallback(
     (slots, dateIndex) => {
       const counts = {
@@ -120,7 +120,7 @@ const TimetableScheduler = () => {
     [getShiftLimitForDay]
   );
 
-  // Function to generate dates from range
+  // FUNCTION to generate dates from range
   const generateDatesFromRange = useCallback((startDate, endDate) => {
     const dates = [];
     let currentDate = startDate;
