@@ -1,0 +1,15 @@
+.button-animation-container{
+    width:  200px;
+      
+}
+
+button {
+    /* display: block; */
+     width: 100% !important;
+  }
+.button-animation-container {
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.button-animation-container.clicked {
+  width: 400px;
+}

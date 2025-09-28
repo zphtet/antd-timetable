@@ -7,3 +7,41 @@
 .timetable-container {
    padding: 50px;
 }
+
+
+button {
+   padding: 0.7rem 1.2rem !important;
+   border: none !important;
+   height: auto !important;
+   width: auto !important;
+   position: relative;
+   transition: all 1s ease;
+ }
+ 
+ button:before {
+   content: '';
+   position: absolute;
+   top: 0;
+   right: 0;
+   bottom: 0;
+   left: 0;
+   z-index: -1;
+   margin: -2px;
+   border-radius: inherit;
+   background: linear-gradient(to right, var(--sc), #0069fb);
+ }
+ 
+ button svg {
+   width: 20px !important;
+   height: 20px !important;
+ }
+ 
+ .active-button {
+   width: 100% !important;
+   transition: all 1s ease;
+ }
+ 
+ .active-button button {
+   width: 100% !important;
+   transition: all 1s ease;
+ }

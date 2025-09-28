@@ -5,9 +5,9 @@ import App from "./App.tsx";
 import "@ant-design/v5-patch-for-react-19";
 import { ConfigProvider } from "antd";
 createRoot(document.getElementById("root")!).render(
-  <StrictMode>
+  // <StrictMode>
     <ConfigProvider direction="ltr">
       <App />
     </ConfigProvider>
-  </StrictMode>
+  // </StrictMode>
 );

@@ -1,0 +1,19 @@
+
+.task{
+    cursor: grab;
+    padding: 20px;
+    border: 1px solid #8c1b1b;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background-color: #fff;
+}
+.column{
+    border: 1px solid #510cb8;
+    padding: 20px;
+    background-color: #fff;
+}
+.column-title{
+    font-size: 30px;
+    font-weight: bold;
+}
