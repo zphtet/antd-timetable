@@ -7,3 +7,9 @@ describe("sample", () => {
     expect(true).toBe(true);
   });
 });
+
+describe("sample2", () => {
+  it("should be true", () => {
+    expect(false).toBe(true);
+  });
+});
