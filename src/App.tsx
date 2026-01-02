@@ -6,7 +6,7 @@
 // import AntTable from "./components/table";
 // import TimetableScheduler from "./components/table";
 
-// @ts-expect-error - This is a JSX file
+
 // import JSXTable from "./jsxversion/table.jsx";
 // import { Watermark } from "antd";
 // import TestComponent from "./jsxversion/test-com";
@@ -22,7 +22,15 @@
 // import ButtonAnimation from "./components/button-animation";
 // import { google} from 'calendar-link'
 // import ReactBeautifulDnD from "./components/react-beautiful-dnd";
-import Dnd from "./components/dnd/dnd";
+// import Dnd from "./components/dnd/dnd";
+// import MultiSteps from "./components/muti-steps";
+// import DrawerFlow from "./components/drawer-flow/drawer-flow";
+// import FormItem from "antd/es/form/FormItem";
+// import PhoneInput from "antd-phone-input";
+import { Button, Form , Input} from "antd";
+
+import PhoneInput from 'react-phone-input-2'
+import 'react-phone-input-2/lib/style.css'
 // const gmaplink = "https://www.google.com/maps/search/?api=1&query=16.8109542,96.114144";
 const App = () => {
 //   const lat = 16.8109542;
@@ -59,7 +67,10 @@ const App = () => {
         <JSXTable />
       </div> */}
       {/* <LongPress /> */}
-      <Dnd />
+      {/* <Dnd />
+      <MultiSteps /> */}
+
+      {/* <DrawerFlow /> */}
 
 {/* <p>hello</p>
 <a
@@ -77,6 +88,33 @@ const App = () => {
 
       <div>
         {/* <TestComponent /> */}
+        <Form 
+          layout="vertical" 
+          initialValues={{
+            phoneNumber: "6578342323"
+          }}
+          onFinish={(values)=>{
+           console.log("values", values);
+        }} >  
+        <Form.Item label="Phone Number" name="phoneNumber">
+          <PhoneInput 
+            country={"sg"} 
+            enableSearch={true} 
+            onlyCountries={["sg",'my','id','mm']} 
+          />
+        </Form.Item>
+      
+        <Form.Item label="Name" name="name">
+          <Input inputMode="numeric" pattern="[0-9]" />
+        </Form.Item>
+        <Form.Item label="Name" name="name">
+          <Input  />
+        </Form.Item>
+
+        <Form.Item>
+            <Button type="primary" htmlType="submit">Submit</Button>
+        </Form.Item>
+        </Form>
       </div>
       {/* <MultiSteps /> */}
 

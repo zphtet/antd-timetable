@@ -7,4 +7,8 @@ export default defineConfig({
   server: {
     allowedHosts: ["localhost", "127.0.0.1", "local.freeboh.com"],
   },
+  test: {
+    globals: true,
+    environment: "jsdom",
+  },
 });
