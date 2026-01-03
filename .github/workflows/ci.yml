@@ -59,6 +59,5 @@ jobs:
           service: vite-antd-demo
           image: us-central1-docker.pkg.dev/new-react-project-483118/docker-repo/vite-antd-demo:latest
           region: us-central1
-          platform: linux/amd64
-          credentials: ${{ secrets.GCP_SA_KEY }}
-          args: --port=3000
+          project_id: new-react-project-483118
+          flags: '--port=3000 --allow-unauthenticated --platform=managed'
