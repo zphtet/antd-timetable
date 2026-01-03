@@ -1,4 +1,4 @@
-name: React Vite CI/CD
+name: React Vite CI
 
 on:
   push:
@@ -7,58 +7,44 @@ on:
     branches: [main]
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout code
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2️⃣ Setup Node.js
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
 
-      # 3️⃣ Install dependencies
       - name: Install dependencies
         run: npm install --force
 
-      # 4️⃣ Run tests
       - name: Run tests
         run: npm run test
 
-      # 5️⃣ Build app
       - name: Build app
         run: npm run build
 
-      # 6️⃣ Set up Docker Buildx (for multi-arch)
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      # 7️⃣ Authenticate to GCP using service account
-      - name: Authenticate to GCP
-        uses: google-github-actions/auth@v1
+      
+      - name: Build Docker image
+        run: docker buildx build -t vite-antd-demo platform linux/amd64 .
+
+      - name: List Docker images
+        run: docker images
+
+      - name: Deploy to Google Cloud Run
+        uses: google-github-actions/deploy-cloud-run@v1
         with:
-          credentials_json: ${{ secrets.GCP_SA_KEY }}
-
-      # 8️⃣ Configure Docker for Artifact Registry
-      - name: Configure Docker
-        run: gcloud auth configure-docker us-central1-docker.pkg.dev
-
-      # 9️⃣ Build & push Docker image for amd64
-      - name: Build and Push Docker Image
-        run: |
-          IMAGE=us-central1-docker.pkg.dev/new-react-project-483118/docker-repo/vite-ant:latest
-          docker buildx build --platform linux/amd64 -t $IMAGE --push .
-
-      # 🔟 Deploy to Cloud Run
-      - name: Deploy to Cloud Run
-        run: |
-          gcloud run deploy vite-ant \
-            --image us-central1-docker.pkg.dev/new-react-project-483118/docker-repo/vite-ant:latest \
-            --region us-central1 \
-            --platform managed \
-            --allow-unauthenticated
+          service: vite-antd-demo
+          image: us-central1-docker.pkg.dev/new-react-project-483118/docker-repo/vite-antd-demo:latest
+          region: us-central1
+          platform: linux/amd64
+          credentials: ${{ secrets.GCP_SA_KEY }}
+          args: --port=3000
