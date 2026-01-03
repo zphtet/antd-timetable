@@ -90,6 +90,7 @@ const App = () => {
         {/* <TestComponent /> */}
         <p>this will be the updated text from github actions</p>
         <p>hello world</p>
+        <p>main force update</p>
         <Form 
           layout="vertical" 
           initialValues={{
