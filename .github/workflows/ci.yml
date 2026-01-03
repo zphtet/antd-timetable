@@ -54,7 +54,7 @@ jobs:
             .
 
       - name: Deploy to Google Cloud Run
-        uses: google-github-actions/deploy-cloud-run@v1
+        uses: google-github-actions/deploy-cloudrun@v2
         with:
           service: vite-antd-demo
           image: us-central1-docker.pkg.dev/new-react-project-483118/docker-repo/vite-antd-demo:latest
