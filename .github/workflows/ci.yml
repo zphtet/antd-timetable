@@ -73,4 +73,4 @@ jobs:
           image: us-central1-docker.pkg.dev/new-react-project-483118/docker-repo/vite-antd-demo:${{ env.IMAGE_TAG }}
           region: us-central1
           project_id: new-react-project-483118
-          flags: '--allow-unauthenticated --platform=managed'
+          flags: '--port=3000 --allow-unauthenticated --platform=managed --memory=512Mi --timeout=300'
