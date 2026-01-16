@@ -28,11 +28,20 @@
 // import FormItem from "antd/es/form/FormItem";
 // import PhoneInput from "antd-phone-input";
 import { Button, Form , Input} from "antd";
-
-import PhoneInput from 'react-phone-input-2'
+import Kanban from "./components/dnd-kit-kanban/Kanban.tsx";
+// import PhoneInput from 'react-phone-input-2'
 import 'react-phone-input-2/lib/style.css'
+import AntDTableWithSubRows from "./components/antd-table/table.tsx";
+import PersonalInfoForm from "./components/dexie-form/form.tsx";
+
+import { ContactForm , DynamicFormsExample , CustomTransformForm } from "./components/dexie-form/example-multiple-forms.tsx";
 // const gmaplink = "https://www.google.com/maps/search/?api=1&query=16.8109542,96.114144";
 const App = () => {
+
+
+  // const columns  = [{id : "hello", items : ['someitem']},{id : "hi", items : ['something']}]
+
+ 
 //   const lat = 16.8109542;
 // const lng = 96.114144;
 
@@ -88,7 +97,7 @@ const App = () => {
 
       <div>
         {/* <TestComponent /> */}
-        <p>this will be the updated text from github actions</p>
+        {/* <p>this will be the updated text from github actions</p>
         <p>hello world</p>
         <p>main force update</p>
         <Form 
@@ -117,7 +126,16 @@ const App = () => {
         <Form.Item>
             <Button type="primary" htmlType="submit">Submit</Button>
         </Form.Item>
-        </Form>
+        </Form> */}
+        {/* <p>hello world</p> */}
+
+        <Kanban />
+        <PersonalInfoForm />
+        {/* <ContactForm formId="contact-form"/> */}
+        <DynamicFormsExample />
+        {/* <CustomTransformForm /> */}
+
+        <AntDTableWithSubRows />
       </div>
       {/* <MultiSteps /> */}
 
